@@ -1,0 +1,23 @@
+{
+    "name": "@pulumi/azuredevops-extensions",
+    "version": "${VERSION}",
+    "keywords": [
+        "pulumi",
+        "azuredevops"
+    ],
+    "homepage": "https://pulumi.io",
+    "repository": "https://github.com/totvs/pulumi-azuredevops-extensions",
+    "license": "Apache-2.0",
+    "scripts": {
+        "build": "tsc"
+    },
+    "dependencies": {
+        "@pulumi/pulumi": "^3.0.0"
+    },
+    "devDependencies": {
+        "typescript": "^4.3.5"
+    },
+    "pulumi": {
+        "resource": true
+    }
+}

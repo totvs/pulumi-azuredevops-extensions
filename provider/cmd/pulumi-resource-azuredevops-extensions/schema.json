@@ -1,0 +1,115 @@
+{
+    "name": "azuredevops-extensions",
+    "description": "A Pulumi provider to manage azuredevops aditional resources not included in azuredevops provider.",
+    "version": "0.0.1",
+    "keywords": [
+        "pulumi",
+        "azuredevops"
+    ],
+    "homepage": "https://pulumi.io",
+    "license": "Apache-2.0",
+    "attribution": "This Pulumi package expose extra azuredevops services",
+    "repository": "https://github.com/totvs/pulumi-azuredevops-extensions",
+    "meta": {
+        "moduleFormat": "(.*)(?:/[^/]*)"
+    },
+    "resources": {
+        "azuredevops-extensions:index:PipelineEnvironment": {
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "The environment name.\n"
+                },
+                "projectId": {
+                    "type": "string",
+                    "description": "The project ID or project name.\n"
+                },
+                "kubernetesResources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/types/azuredevops-extensions:index:KubernetesResource"
+                    },
+                    "description": "List of kubernetes resources.\n"
+                }
+            },
+            "required": [
+                "name",
+                "projectId"
+            ],
+            "inputProperties": {
+                "name": {
+                    "type": "string"
+                },
+                "projectId": {
+                    "type": "string",
+                    "description": "The project ID or project name.\n"
+                },
+                "kubernetesResources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/types/azuredevops-extensions:index:KubernetesResource"
+                    },
+                    "description": "List of kubernetes resources.\n"
+                }
+            },
+            "requiredInputs": [
+                "name",
+                "projectId"
+            ]
+        }
+    },
+    "types": {
+        "azuredevops-extensions:index:KubernetesResource": {
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "The resource name.\n"
+                },
+                "namespace": {
+                    "type": "string",
+                    "description": "The resource namemespace.\n"
+                },
+                "clusterName": {
+                    "type": "string",
+                    "description": "The resource cluster name.\n"
+                },
+                "serviceEndpointId": {
+                    "type": "string",
+                    "description": "The service endpoint id.\n"
+                }
+            },
+            "type": "object",
+            "required": [
+                "name",
+                "namespace",
+                "clusterName",
+                "serviceEndpointId"
+            ]
+        }
+    },
+    "language": {
+        "csharp": {
+            "dictionaryConstructors": true,
+            "namespaces": {
+                "azuredevops-extensions": "AzureDevopsExtensions"
+            },
+            "packageReferences": {
+                "Pulumi": "3.*"
+            }
+        },
+        "go": {
+            "generateResourceContainerTypes": true,
+            "importBasePath":"github.com/totvs/pulumi-azuredevops-extensions/sdk/v3/go/azuredevops"
+        },
+        "nodejs": {
+            "dependencies": {
+                "@pulumi/pulumi": "^3.0.0"
+            }
+        },
+        "python": {
+            "requires": {
+                "pulumi": ">=3.0.0,<4.0.0"
+            }
+        }
+    }
+}
