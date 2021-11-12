@@ -1,5 +1,13 @@
 # Permissions
 
+You need to create a new personal access token (PAT) for an Azure DevOps account. See the list of needed permissions below:
+
+```yaml
+Service Connections:
+- Read
+Environment:
+- Read & manage
+```
 
 ## Environment
 
