@@ -1,17 +1,19 @@
 name: master
-"on":
+on:
   push:
     branches:
       - master
-      - "feature-**"
+      - 'feature-**'
     paths-ignore:
       - CHANGELOG.md
+      - README.md
+      - 'examples/**'
     tags-ignore:
-      - v*
-      - sdk/*
+      - 'v*'
+      - 'sdk/*'
       - '**'
 env:
-  GO111MODULE: "on"
+  GO111MODULE: 'on'
   PROVIDER: azuredevops-extensions
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:

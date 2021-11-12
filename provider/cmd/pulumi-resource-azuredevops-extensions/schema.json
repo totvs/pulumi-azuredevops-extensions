@@ -13,6 +13,28 @@
     "meta": {
         "moduleFormat": "(.*)(?:/[^/]*)"
     },
+    "config": {
+        "variables": {
+            "orgServiceUrl": {
+                "type": "string",
+                "description": "The url of the Azure DevOps instance which should be used.\n",
+                "defaultInfo": {
+                    "environment": [
+                        "AZDO_ORG_SERVICE_URL"
+                    ]
+                }
+            },
+            "personalAccessToken": {
+                "type": "string",
+                "description": "The personal access token which should be used.\n",
+                "defaultInfo": {
+                    "environment": [
+                        "AZDO_PERSONAL_ACCESS_TOKEN"
+                    ]
+                }
+            }
+        }
+    },
     "resources": {
         "azuredevops-extensions:index:PipelineEnvironment": {
             "properties": {

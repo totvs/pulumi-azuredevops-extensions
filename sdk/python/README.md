@@ -3,6 +3,28 @@
 
 ## Environment
 
+You need to set Azure DevOps token and project with:
+
+```sh
+export AZDO_PERSONAL_ACCESS_TOKEN=ahdflakjsdhdfkajsdhdflkajshdflakjs34t9813h4v134ht3i4
+export AZDO_ORG_SERVICE_URL=https://dev.azure.com/typeorganizationhere
+```
+or
+```sh
+pulumi config set --secret azuredevops:config:orgServiceUrl https://dev.azure.com/typeorganizationhere
+pulumi config set --secret azuredevops:config:personalAccessToken ahdflakjsdhdfkajsdhdflkajshdflakjs34t9813h4v134ht3i4
+pulumi config set --secret azuredevops-extensions:config:orgServiceUrl https://dev.azure.com/typeorganizationhere
+pulumi config set --secret azuredevops-extensions:config:personalAccessToken ahdflakjsdhdfkajsdhdflkajshdflakjs34t9813h4v134ht3i4
+```
+
+# Usage
+
+Install Plugin
+
+```bash
+pulumi plugin install resource azuredevops-extensions 0.0.1 -f /tmp/pulumi-resource-azuredevops-extensions-v0.0.1-alpha.1636740383+16f5476c-linux-amd64.tar.gz
+```
+
 ## Pre-requisites to develop
 
 Install the `pulumictl` cli from the [releases](https://github.com/pulumi/pulumictl/releases) page or follow the [install instructions](https://github.com/pulumi/pulumictl#installation)

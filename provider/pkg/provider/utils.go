@@ -41,7 +41,7 @@ func (sc *AzureDevopsConfig) getConfig(configName, envName string) string {
 }
 
 func (sc *AzureDevopsConfig) getOrgServiceUrl() (*string, error) {
-	token := sc.getConfig("orgServiceUrl", "AZDO_ORG_SERVICE_URL")
+	token := sc.getConfig("azuredevops-extensions:config:orgServiceUrl", "AZDO_ORG_SERVICE_URL")
 
 	if len(token) == 0 {
 		return nil, fmt.Errorf("no org for azure devops service url found")
@@ -51,10 +51,10 @@ func (sc *AzureDevopsConfig) getOrgServiceUrl() (*string, error) {
 }
 
 func (sc *AzureDevopsConfig) getPersonalAccessToken() (*string, error) {
-	token := sc.getConfig("personalAccessToken", "AZDO_PERSONAL_ACCESS_TOKEN")
+	token := sc.getConfig("azuredevops-extensions:config:personalAccessToken", "AZDO_PERSONAL_ACCESS_TOKEN")
 
 	if len(token) == 0 {
-		return nil, fmt.Errorf("no org for azure devops service url found")
+		return nil, fmt.Errorf("no personal access token for azure devops found")
 	}
 
 	return &token, nil
