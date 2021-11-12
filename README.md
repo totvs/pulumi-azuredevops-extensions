@@ -1,4 +1,7 @@
-# Permissions
+# Intro
+This provider was created to complement the original [AzureDevOps Provider](https://www.pulumi.com/registry/packages/azuredevops). The original provider doesn't have resource environments to support pipelines as yaml code. In the future, maybe, we'll have this feature and this provider will be deprecated.
+
+## Permissions
 
 You need to create a new personal access token (PAT) for an Azure DevOps account. See the list of needed permissions below:
 
@@ -11,7 +14,7 @@ Environment:
 
 ## Environment
 
-You need to set Azure DevOps token and project with:
+You can set Azure DevOps token and organization service url with:
 
 ```sh
 export AZDO_PERSONAL_ACCESS_TOKEN=ahdflakjsdhdfkajsdhdflkajshdflakjs34t9813h4v134ht3i4
@@ -23,9 +26,9 @@ pulumi config set --secret azuredevops-extensions:config:orgServiceUrl https://d
 pulumi config set --secret azuredevops-extensions:config:personalAccessToken ahdflakjsdhdfkajsdhdflkajshdflakjs34t9813h4v134ht3i4
 ```
 
-# Usage
+# Installation
 
-Install Plugin
+You can install the plugin with these commands:
 
 ```bash
 wget https://github.com/totvs/pulumi-azuredevops-extensions/releases/download/v0.0.2-alpha.1636747691%2Bbb5b83c8/pulumi-resource-azuredevops-extensions-v0.0.2-alpha.1636747691+bb5b83c8-linux-amd64.tar.gz
@@ -33,6 +36,10 @@ wget https://github.com/totvs/pulumi-azuredevops-extensions/releases/download/v0
 pulumi plugin install resource azuredevops-extensions 0.0.2 -f pulumi-resource-azuredevops-extensions-v0.0.2-alpha.1636747691+bb5b83c8-linux-amd64.tar.gz
 ```
 
+# Usage
+See the example in go language [here](https://github.com/totvs/pulumi-azuredevops-extensions/tree/master/examples/go).
+
+# Development
 ## Pre-requisites to develop
 
 Install the `pulumictl` cli from the [releases](https://github.com/pulumi/pulumictl/releases) page or follow the [install instructions](https://github.com/pulumi/pulumictl#installation)
