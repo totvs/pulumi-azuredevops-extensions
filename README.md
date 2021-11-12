@@ -20,7 +20,9 @@ pulumi config set --secret azuredevops-extensions:config:personalAccessToken ahd
 Install Plugin
 
 ```bash
-pulumi plugin install resource azuredevops-extensions 0.0.1 -f /tmp/pulumi-resource-azuredevops-extensions-v0.0.1-alpha.1636740383+16f5476c-linux-amd64.tar.gz
+wget https://github.com/totvs/pulumi-azuredevops-extensions/releases/download/v0.0.2-alpha.1636747691%2Bbb5b83c8/pulumi-resource-azuredevops-extensions-v0.0.2-alpha.1636747691+bb5b83c8-linux-amd64.tar.gz
+
+pulumi plugin install resource azuredevops-extensions 0.0.2 -f pulumi-resource-azuredevops-extensions-v0.0.2-alpha.1636747691+bb5b83c8-linux-amd64.tar.gz
 ```
 
 ## Pre-requisites to develop
