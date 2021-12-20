@@ -243,7 +243,7 @@ func (c *AzureDevopsEnvironmentResource) createEnvironmentPipeline(input AzureDe
 			c.amountOfTrial++
 
 			c.exponentialBackoff *= 2
-			fmt.Printf("try #%s, Next check will be after %s seconds", c.amountOfTrial, c.exponentialBackoff.Seconds())
+			fmt.Printf("try #%s, next attempt on %s seconds", c.amountOfTrial, c.exponentialBackoff.Seconds())
 			time.Sleep(c.exponentialBackoff)
 
 			return c.createEnvironmentPipeline(input, numberOfAttempts)
