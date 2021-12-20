@@ -85,9 +85,6 @@ func (azer *AzureDevopsEnvironmentResource) Create(req *pulumirpc.CreateRequest)
 		return nil, err
 	}
 
-	azer.amountOfTrial = 0
-	azer.exponentialBackoff = 1
-
 	numberOfAttempts, err := azer.config.getNumberOfAttempts()
 	if err != nil {
 		return nil, err
@@ -238,18 +235,7 @@ func (c *AzureDevopsEnvironmentResource) createEnvironmentPipeline(input AzureDe
 		Post(url)
 
 	if err != nil || resp.StatusCode() != 200 {
-
-		if c.amountOfTrial < numberOfAttempts {
-			c.amountOfTrial++
-
-			c.exponentialBackoff *= 2
-			fmt.Printf("try #%s, next attempt on %s seconds", c.amountOfTrial, c.exponentialBackoff.Seconds())
-			time.Sleep(c.exponentialBackoff)
-
-			return c.createEnvironmentPipeline(input, numberOfAttempts)
-		}
-
-		return nil, fmt.Errorf("error creating enviroment pipeline [%s/%s/%s]': %s", input.ProjectId, input.Name, resp.Status(), err)
+		return nil, fmt.Errorf("error creating environment pipeline [%s/%s/%s]': %s", input.ProjectId, input.Name, resp.Status(), err)
 	}
 
 	var result map[string]interface{}
@@ -257,6 +243,9 @@ func (c *AzureDevopsEnvironmentResource) createEnvironmentPipeline(input AzureDe
 	id := int(result["id"].(float64))
 
 	for _, resource := range input.KubernetesResources {
+		c.amountOfTrial = 0
+		c.exponentialBackoff = 1
+
 		_, err = c.createResourceEnvironmentPipeline(
 			resource.Name,
 			input.ProjectId,
@@ -264,6 +253,7 @@ func (c *AzureDevopsEnvironmentResource) createEnvironmentPipeline(input AzureDe
 			resource.ClusterName,
 			resource.Namespace,
 			resource.ServiceEndpointId,
+			numberOfAttempts,
 		)
 
 		if err != nil {
@@ -282,7 +272,8 @@ func (c *AzureDevopsEnvironmentResource) createResourceEnvironmentPipeline(
 	environmentId int,
 	clusterName string,
 	namespace string,
-	serviceEndpointId string) (*int, error) {
+	serviceEndpointId string,
+	numberOfAttempts int) (*int, error) {
 
 	urlOrg, err := c.config.getOrgServiceUrl()
 	if err != nil {
@@ -307,7 +298,25 @@ func (c *AzureDevopsEnvironmentResource) createResourceEnvironmentPipeline(
 		}).
 		Post(url)
 
-	if err != nil || resp.StatusCode() != 200 {
+	if err != nil || resp.StatusCode() > 399 {
+		if c.amountOfTrial < numberOfAttempts {
+			c.amountOfTrial++
+
+			c.exponentialBackoff *= 2
+			fmt.Printf("try #%d, next attempt on %f seconds\n", c.amountOfTrial, c.exponentialBackoff.Seconds())
+			time.Sleep(c.exponentialBackoff)
+
+			return c.createResourceEnvironmentPipeline(
+				name,
+				projectId,
+				environmentId,
+				clusterName,
+				namespace,
+				serviceEndpointId,
+				numberOfAttempts,
+			)
+		}
+
 		return nil, fmt.Errorf("error creating resource environment pipeline [%s/%s/%s/%s]: %s", projectId, serviceEndpointId, name, resp.Status(), err)
 	}
 

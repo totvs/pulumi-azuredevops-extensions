@@ -32,11 +32,11 @@ namespace Pulumi.AzureDevopsExtensions
 
         private static readonly Pulumi.Config __config = new Pulumi.Config("azuredevops-extensions");
 
-        private static readonly __Value<double?> _numberOfAttempts = new __Value<double?>(() => __config.GetDouble("numberOfAttempts") ?? Utilities.GetEnvDouble("NUMBER_OF_ATTEMPTS"));
+        private static readonly __Value<int?> _numberOfAttempts = new __Value<int?>(() => __config.GetInt32("numberOfAttempts") ?? Utilities.GetEnvInt32("NUMBER_OF_ATTEMPTS"));
         /// <summary>
         /// The number of attempts.
         /// </summary>
-        public static double? NumberOfAttempts
+        public static int? NumberOfAttempts
         {
             get => _numberOfAttempts.Get();
             set => _numberOfAttempts.Set(value);
@@ -60,16 +60,6 @@ namespace Pulumi.AzureDevopsExtensions
         {
             get => _personalAccessToken.Get();
             set => _personalAccessToken.Set(value);
-        }
-
-        private static readonly __Value<int?> _numberOfAttempts = new __Value<int?>(() => __config.Get("numberOfAttempts") ?? Utilities.GetEnv("AZDO_PERSONAL_ACCESS_TOKEN"));
-        /// <summary>
-        /// The number of attempts.
-        /// </summary>
-        public static int? numberOfAttempts
-        {
-            get => _numberOfAttempts.Get();
-            set => _numberOfAttempts.Set(value);
         }
 
     }

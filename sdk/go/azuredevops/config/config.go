@@ -8,6 +8,15 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
 )
 
+// The number of attempts.
+func GetNumberOfAttempts(ctx *pulumi.Context) int {
+	v, err := config.TryInt(ctx, "azuredevops-extensions:numberOfAttempts")
+	if err == nil {
+		return v
+	}
+	return getEnvOrDefault(0, parseEnvInt, "NUMBER_OF_ATTEMPTS").(int)
+}
+
 // The url of the Azure DevOps instance which should be used.
 func GetOrgServiceUrl(ctx *pulumi.Context) string {
 	v, err := config.Try(ctx, "azuredevops-extensions:orgServiceUrl")
@@ -24,13 +33,4 @@ func GetPersonalAccessToken(ctx *pulumi.Context) string {
 		return v
 	}
 	return getEnvOrDefault("", nil, "AZDO_PERSONAL_ACCESS_TOKEN").(string)
-}
-
-// The number of attempts.
-func GetNumberOfAttempts(ctx *pulumi.Context) int {
-	v, err := config.Try(ctx, "azuredevops-extensions:numberOfAttempts")
-	if err == nil {
-		return v
-	}
-	return getEnvOrDefault("", nil, "NUMBER_OF_ATTEMPTS").(int)
 }

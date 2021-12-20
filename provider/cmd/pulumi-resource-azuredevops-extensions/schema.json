@@ -34,7 +34,7 @@
                 }
             },
             "numberOfAttempts": {
-                "type": "number",
+                "type": "integer",
                 "description": "The number of attempts.\n",
                 "defaultInfo": {
                     "environment": [
