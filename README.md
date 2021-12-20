@@ -19,11 +19,13 @@ You can set Azure DevOps token and organization service url with:
 ```sh
 export AZDO_PERSONAL_ACCESS_TOKEN=ahdflakjsdhdfkajsdhdflkajshdflakjs34t9813h4v134ht3i4
 export AZDO_ORG_SERVICE_URL=https://dev.azure.com/typeorganizationhere
+export NUMBER_OF_ATTEMPTS=3
 ```
 or
 ```sh
 pulumi config set --secret azuredevops-extensions:config:orgServiceUrl https://dev.azure.com/typeorganizationhere
 pulumi config set --secret azuredevops-extensions:config:personalAccessToken ahdflakjsdhdfkajsdhdflkajshdflakjs34t9813h4v134ht3i4
+pulumi config set --secret azuredevops-extensions:config:numberOfAttempts 3
 ```
 
 # Installation
@@ -53,7 +55,7 @@ Install the `pulumictl` cli from the [releases](https://github.com/pulumi/pulumi
 $ make build install
 
 # test
-$ cd examples/ts
+$ cd examples/go
 $ yarn link @pulumi/azuredevops-extensions
 $ yarn install
 $ pulumi stack init test

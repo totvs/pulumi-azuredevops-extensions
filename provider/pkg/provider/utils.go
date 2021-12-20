@@ -79,9 +79,21 @@ func getResourceNameFromRequest(req ResourceBase) string {
 func (sc *AzureDevopsConfig) getNumberOfAttempts() (*int, error) {
 	token := sc.getConfig("azuredevops-extensions:config:numberOfAttempts", "NUMBER_OF_ATTEMPTS")
 
-	if len(token) == 0 {
-		return strconv.Atoi(0), nil
+	numberOfAttempts, err := strconv.Atoi("0")
+
+	if err != nil {
+		return nil, err
 	}
 
-	return &strconv.Atoi(token), nil
+	if len(token) == 0 {
+		return &numberOfAttempts, nil
+	}
+
+	numberOfAttempts, err = strconv.Atoi("0")
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &numberOfAttempts, nil
 }

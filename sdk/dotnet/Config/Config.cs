@@ -32,6 +32,16 @@ namespace Pulumi.AzureDevopsExtensions
 
         private static readonly Pulumi.Config __config = new Pulumi.Config("azuredevops-extensions");
 
+        private static readonly __Value<double?> _numberOfAttempts = new __Value<double?>(() => __config.GetDouble("numberOfAttempts") ?? Utilities.GetEnvDouble("NUMBER_OF_ATTEMPTS"));
+        /// <summary>
+        /// The number of attempts.
+        /// </summary>
+        public static double? NumberOfAttempts
+        {
+            get => _numberOfAttempts.Get();
+            set => _numberOfAttempts.Set(value);
+        }
+
         private static readonly __Value<string?> _orgServiceUrl = new __Value<string?>(() => __config.Get("orgServiceUrl") ?? Utilities.GetEnv("AZDO_ORG_SERVICE_URL"));
         /// <summary>
         /// The url of the Azure DevOps instance which should be used.

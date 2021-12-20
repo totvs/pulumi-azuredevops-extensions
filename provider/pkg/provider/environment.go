@@ -85,13 +85,13 @@ func (azer *AzureDevopsEnvironmentResource) Create(req *pulumirpc.CreateRequest)
 
 	azer.amountOfTrial = 0
 
-	numberOfAttempts, err := c.config.getNumberOfAttempts()
+	numberOfAttempts, err := azer.config.getNumberOfAttempts()
 	if err != nil {
 		return nil, err
 	}
 
 	inputsEnviroment := azer.ToAzureDevopsEnviromentInput(inputs)
-	environmentId, err := azer.createEnvironmentPipeline(inputsEnviroment, numberOfAttempts)
+	environmentId, err := azer.createEnvironmentPipeline(inputsEnviroment, *numberOfAttempts)
 	if err != nil {
 		return nil, fmt.Errorf("error creating enviroment pipeline [%s/%s]: %s", inputsEnviroment.ProjectId, inputsEnviroment.Name, err.Error())
 	}
@@ -236,8 +236,8 @@ func (c *AzureDevopsEnvironmentResource) createEnvironmentPipeline(input AzureDe
 
 	if err != nil || resp.StatusCode() != 200 {
 
-		if azer.amountOfTrial < numberOfAttempts {
-			azer.amountOfTrial++
+		if c.amountOfTrial < numberOfAttempts {
+			c.amountOfTrial++
 			return c.createEnvironmentPipeline(input, numberOfAttempts)
 		}
 
