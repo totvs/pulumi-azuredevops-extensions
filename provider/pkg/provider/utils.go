@@ -89,7 +89,7 @@ func (sc *AzureDevopsConfig) getNumberOfAttempts() (*int, error) {
 		return &numberOfAttempts, nil
 	}
 
-	numberOfAttempts, err = strconv.Atoi("0")
+	numberOfAttempts, err = strconv.Atoi(token)
 
 	if err != nil {
 		return nil, err
