@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"time"
 
 	resty "github.com/go-resty/resty/v2"
 	pbempty "github.com/golang/protobuf/ptypes/empty"
@@ -15,8 +16,9 @@ import (
 )
 
 type AzureDevopsEnvironmentResource struct {
-	config        AzureDevopsConfig
-	amountOfTrial int
+	config             AzureDevopsConfig
+	amountOfTrial      int
+	exponentialBackoff time.Duration
 }
 
 type AzureDevopsEnvironmentInput struct {
@@ -84,6 +86,7 @@ func (azer *AzureDevopsEnvironmentResource) Create(req *pulumirpc.CreateRequest)
 	}
 
 	azer.amountOfTrial = 0
+	azer.exponentialBackoff = 1
 
 	numberOfAttempts, err := azer.config.getNumberOfAttempts()
 	if err != nil {
@@ -238,6 +241,11 @@ func (c *AzureDevopsEnvironmentResource) createEnvironmentPipeline(input AzureDe
 
 		if c.amountOfTrial < numberOfAttempts {
 			c.amountOfTrial++
+
+			c.exponentialBackoff *= 2
+			fmt.Printf("try #%s, Next check will be after %s seconds", c.amountOfTrial, c.exponentialBackoff.Seconds())
+			time.Sleep(c.exponentialBackoff)
+
 			return c.createEnvironmentPipeline(input, numberOfAttempts)
 		}
 
