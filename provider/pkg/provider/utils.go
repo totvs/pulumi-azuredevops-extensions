@@ -3,6 +3,7 @@ package provider
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	pbempty "github.com/golang/protobuf/ptypes/empty"
 	"github.com/pulumi/pulumi/sdk/v3/go/common/resource"
@@ -73,4 +74,14 @@ func getAzureDevopsResource(name string) AzureDevopsResource {
 func getResourceNameFromRequest(req ResourceBase) string {
 	urn := resource.URN(req.GetUrn())
 	return urn.Type().String()
+}
+
+func (sc *AzureDevopsConfig) getNumberOfAttempts() (*int, error) {
+	token := sc.getConfig("azuredevops-extensions:config:numberOfAttempts", "NUMBER_OF_ATTEMPTS")
+
+	if len(token) == 0 {
+		return strconv.Atoi(0), nil
+	}
+
+	return &strconv.Atoi(token), nil
 }

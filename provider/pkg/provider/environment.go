@@ -15,7 +15,8 @@ import (
 )
 
 type AzureDevopsEnvironmentResource struct {
-	config AzureDevopsConfig
+	config        AzureDevopsConfig
+	amountOfTrial int
 }
 
 type AzureDevopsEnvironmentInput struct {
@@ -82,8 +83,15 @@ func (azer *AzureDevopsEnvironmentResource) Create(req *pulumirpc.CreateRequest)
 		return nil, err
 	}
 
+	azer.amountOfTrial = 0
+
+	numberOfAttempts, err := c.config.getNumberOfAttempts()
+	if err != nil {
+		return nil, err
+	}
+
 	inputsEnviroment := azer.ToAzureDevopsEnviromentInput(inputs)
-	environmentId, err := azer.createEnvironmentPipeline(inputsEnviroment)
+	environmentId, err := azer.createEnvironmentPipeline(inputsEnviroment, numberOfAttempts)
 	if err != nil {
 		return nil, fmt.Errorf("error creating enviroment pipeline [%s/%s]: %s", inputsEnviroment.ProjectId, inputsEnviroment.Name, err.Error())
 	}
@@ -206,7 +214,8 @@ func (r *AzureDevopsEnvironmentResource) ToAzureDevopsEnviromentInput(inputMap r
 }
 
 /// https://docs.microsoft.com/en-us/rest/api/azure/devops/distributedtask/environments?view=azure-devops-rest-6.0
-func (c *AzureDevopsEnvironmentResource) createEnvironmentPipeline(input AzureDevopsEnvironmentInput) (*int, error) {
+func (c *AzureDevopsEnvironmentResource) createEnvironmentPipeline(input AzureDevopsEnvironmentInput, numberOfAttempts int) (*int, error) {
+
 	urlOrg, err := c.config.getOrgServiceUrl()
 	if err != nil {
 		return nil, err
@@ -226,6 +235,12 @@ func (c *AzureDevopsEnvironmentResource) createEnvironmentPipeline(input AzureDe
 		Post(url)
 
 	if err != nil || resp.StatusCode() != 200 {
+
+		if azer.amountOfTrial < numberOfAttempts {
+			azer.amountOfTrial++
+			return c.createEnvironmentPipeline(input, numberOfAttempts)
+		}
+
 		return nil, fmt.Errorf("error creating enviroment pipeline [%s/%s/%s]': %s", input.ProjectId, input.Name, resp.Status(), err)
 	}
 
