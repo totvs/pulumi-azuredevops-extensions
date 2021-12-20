@@ -29,3 +29,14 @@ Object.defineProperty(exports, "personalAccessToken", {
     enumerable: true,
 });
 
+/**
+ * The number of attempts.
+ */
+export declare const numberOfAttempts: number | undefined;
+Object.defineProperty(exports, "numberOfAttempts", {
+    get() {
+        return __config.get("numberOfAttempts") ?? utilities.getEnv("NUMBER_OF_ATTEMPTS");
+    },
+    enumerable: true,
+});
+

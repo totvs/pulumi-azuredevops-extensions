@@ -28,3 +28,10 @@ class _ExportableConfig(types.ModuleType):
         """
         return __config__.get('personalAccessToken') or _utilities.get_env('AZDO_PERSONAL_ACCESS_TOKEN')
 
+    @property
+    def number_of_attempts(self) -> Optional[str]:
+        """
+        The number of attempts.
+        """
+        return __config__.get('numberOfAttempts') or _utilities.get_env('NUMBER_OF_ATTEMPTS')
+

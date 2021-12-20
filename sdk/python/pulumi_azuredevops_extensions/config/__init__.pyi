@@ -18,3 +18,8 @@ personalAccessToken: Optional[str]
 The personal access token which should be used.
 """
 
+numberOfAttempts: Optional[str]
+"""
+The number of attempts
+"""
+

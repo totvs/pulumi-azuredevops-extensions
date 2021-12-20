@@ -25,3 +25,12 @@ func GetPersonalAccessToken(ctx *pulumi.Context) string {
 	}
 	return getEnvOrDefault("", nil, "AZDO_PERSONAL_ACCESS_TOKEN").(string)
 }
+
+// The number of attempts.
+func GetNumberOfAttempts(ctx *pulumi.Context) int {
+	v, err := config.Try(ctx, "azuredevops-extensions:numberOfAttempts")
+	if err == nil {
+		return v
+	}
+	return getEnvOrDefault("", nil, "NUMBER_OF_ATTEMPTS").(int)
+}

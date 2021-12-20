@@ -62,5 +62,15 @@ namespace Pulumi.AzureDevopsExtensions
             set => _personalAccessToken.Set(value);
         }
 
+        private static readonly __Value<int?> _numberOfAttempts = new __Value<int?>(() => __config.Get("numberOfAttempts") ?? Utilities.GetEnv("AZDO_PERSONAL_ACCESS_TOKEN"));
+        /// <summary>
+        /// The number of attempts.
+        /// </summary>
+        public static int? numberOfAttempts
+        {
+            get => _numberOfAttempts.Get();
+            set => _numberOfAttempts.Set(value);
+        }
+
     }
 }
