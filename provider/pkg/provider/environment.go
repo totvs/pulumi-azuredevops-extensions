@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"time"
 
 	resty "github.com/go-resty/resty/v2"
 	pbempty "github.com/golang/protobuf/ptypes/empty"
@@ -15,7 +16,9 @@ import (
 )
 
 type AzureDevopsEnvironmentResource struct {
-	config AzureDevopsConfig
+	config             AzureDevopsConfig
+	amountOfTrial      int
+	exponentialBackoff time.Duration
 }
 
 type AzureDevopsEnvironmentInput struct {
@@ -82,8 +85,13 @@ func (azer *AzureDevopsEnvironmentResource) Create(req *pulumirpc.CreateRequest)
 		return nil, err
 	}
 
+	numberOfAttempts, err := azer.config.getNumberOfAttempts()
+	if err != nil {
+		return nil, err
+	}
+
 	inputsEnviroment := azer.ToAzureDevopsEnviromentInput(inputs)
-	environmentId, err := azer.createEnvironmentPipeline(inputsEnviroment)
+	environmentId, err := azer.createEnvironmentPipeline(inputsEnviroment, *numberOfAttempts)
 	if err != nil {
 		return nil, fmt.Errorf("error creating enviroment pipeline [%s/%s]: %s", inputsEnviroment.ProjectId, inputsEnviroment.Name, err.Error())
 	}
@@ -206,7 +214,8 @@ func (r *AzureDevopsEnvironmentResource) ToAzureDevopsEnviromentInput(inputMap r
 }
 
 /// https://docs.microsoft.com/en-us/rest/api/azure/devops/distributedtask/environments?view=azure-devops-rest-6.0
-func (c *AzureDevopsEnvironmentResource) createEnvironmentPipeline(input AzureDevopsEnvironmentInput) (*int, error) {
+func (c *AzureDevopsEnvironmentResource) createEnvironmentPipeline(input AzureDevopsEnvironmentInput, numberOfAttempts int) (*int, error) {
+
 	urlOrg, err := c.config.getOrgServiceUrl()
 	if err != nil {
 		return nil, err
@@ -226,7 +235,7 @@ func (c *AzureDevopsEnvironmentResource) createEnvironmentPipeline(input AzureDe
 		Post(url)
 
 	if err != nil || resp.StatusCode() != 200 {
-		return nil, fmt.Errorf("error creating enviroment pipeline [%s/%s/%s]': %s", input.ProjectId, input.Name, resp.Status(), err)
+		return nil, fmt.Errorf("error creating environment pipeline [%s/%s/%s]': %s", input.ProjectId, input.Name, resp.Status(), err)
 	}
 
 	var result map[string]interface{}
@@ -234,6 +243,9 @@ func (c *AzureDevopsEnvironmentResource) createEnvironmentPipeline(input AzureDe
 	id := int(result["id"].(float64))
 
 	for _, resource := range input.KubernetesResources {
+		c.amountOfTrial = 0
+		c.exponentialBackoff = 1
+
 		_, err = c.createResourceEnvironmentPipeline(
 			resource.Name,
 			input.ProjectId,
@@ -241,6 +253,7 @@ func (c *AzureDevopsEnvironmentResource) createEnvironmentPipeline(input AzureDe
 			resource.ClusterName,
 			resource.Namespace,
 			resource.ServiceEndpointId,
+			numberOfAttempts,
 		)
 
 		if err != nil {
@@ -259,7 +272,8 @@ func (c *AzureDevopsEnvironmentResource) createResourceEnvironmentPipeline(
 	environmentId int,
 	clusterName string,
 	namespace string,
-	serviceEndpointId string) (*int, error) {
+	serviceEndpointId string,
+	numberOfAttempts int) (*int, error) {
 
 	urlOrg, err := c.config.getOrgServiceUrl()
 	if err != nil {
@@ -284,7 +298,25 @@ func (c *AzureDevopsEnvironmentResource) createResourceEnvironmentPipeline(
 		}).
 		Post(url)
 
-	if err != nil || resp.StatusCode() != 200 {
+	if err != nil || resp.StatusCode() > 399 {
+		if c.amountOfTrial < numberOfAttempts {
+			c.amountOfTrial++
+
+			c.exponentialBackoff *= 2
+			fmt.Printf("try #%d, next attempt on %f seconds\n", c.amountOfTrial, c.exponentialBackoff.Seconds())
+			time.Sleep(c.exponentialBackoff)
+
+			return c.createResourceEnvironmentPipeline(
+				name,
+				projectId,
+				environmentId,
+				clusterName,
+				namespace,
+				serviceEndpointId,
+				numberOfAttempts,
+			)
+		}
+
 		return nil, fmt.Errorf("error creating resource environment pipeline [%s/%s/%s/%s]: %s", projectId, serviceEndpointId, name, resp.Status(), err)
 	}
 

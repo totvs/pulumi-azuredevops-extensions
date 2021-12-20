@@ -32,6 +32,15 @@
                         "AZDO_PERSONAL_ACCESS_TOKEN"
                     ]
                 }
+            },
+            "numberOfAttempts": {
+                "type": "integer",
+                "description": "The number of attempts.\n",
+                "defaultInfo": {
+                    "environment": [
+                        "NUMBER_OF_ATTEMPTS"
+                    ]
+                }
             }
         }
     },

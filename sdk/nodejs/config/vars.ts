@@ -8,6 +8,17 @@ declare var exports: any;
 const __config = new pulumi.Config("azuredevops-extensions");
 
 /**
+ * The number of attempts.
+ */
+export declare const numberOfAttempts: number | undefined;
+Object.defineProperty(exports, "numberOfAttempts", {
+    get() {
+        return __config.getObject<number>("numberOfAttempts") ?? <any>utilities.getEnvNumber("NUMBER_OF_ATTEMPTS");
+    },
+    enumerable: true,
+});
+
+/**
  * The url of the Azure DevOps instance which should be used.
  */
 export declare const orgServiceUrl: string | undefined;
