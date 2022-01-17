@@ -7,6 +7,10 @@ import * as utilities from "./utilities";
 // Export members:
 export * from "./pipelineEnvironment";
 export * from "./provider";
+export * from "./roleAssignment";
+
+// Export enums:
+export * from "./types/enums";
 
 // Export sub-modules:
 import * as config from "./config";
@@ -19,6 +23,7 @@ export {
 
 // Import resources to register:
 import { PipelineEnvironment } from "./pipelineEnvironment";
+import { RoleAssignment } from "./roleAssignment";
 
 const _module = {
     version: utilities.getVersion(),
@@ -26,6 +31,8 @@ const _module = {
         switch (type) {
             case "azuredevops-extensions:index:PipelineEnvironment":
                 return new PipelineEnvironment(name, <any>undefined, { urn })
+            case "azuredevops-extensions:index:RoleAssignment":
+                return new RoleAssignment(name, <any>undefined, { urn })
             default:
                 throw new Error(`unknown resource type ${type}`);
         }

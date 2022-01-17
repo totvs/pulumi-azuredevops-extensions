@@ -45,6 +45,70 @@
         }
     },
     "resources": {
+        "azuredevops-extensions:index:RoleAssignment": {
+            "properties": {
+                "resourceId": {
+                    "type": "string",
+                    "description": "Id of the resource on which the role is to be assigned (ex projectId).\n"
+                },
+                "identityId": {
+                    "type": "string",
+                    "description": "Id of the identity to assign the role to.\n"
+                },
+                "scopeName": {
+                    "type": "object",
+                    "$ref": "#/types/azuredevops-extensions:index:ScopeName",
+                    "description": "The scope name.\n"
+                },
+                "userId": {
+                    "type": "string",
+                    "description": "Unique id of the user given the role assignment.\n"
+                },
+                "roleName": {
+                    "type": "object",
+                    "$ref": "#/types/azuredevops-extensions:index:RoleName",
+                    "description": "The name of the role assigned.\n"
+                }
+            },
+            "required": [
+                "resourceId",
+                "identityId",
+                "scopeName",
+                "userId",
+                "roleName"
+            ],
+            "inputProperties": {
+                "resourceId": {
+                    "type": "string",
+                    "description": "Id of the resource on which the role is to be assigned.\n"
+                },
+                "identityId": {
+                    "type": "string",
+                    "description": "Id of the identity to assign the role to.\n"
+                },
+                "scopeName": {
+                    "type": "object",
+                    "$ref": "#/types/azuredevops-extensions:index:ScopeName",
+                    "description": "The scope name.\n"
+                },
+                "userId": {
+                    "type": "string",
+                    "description": "Unique id of the user given the role assignment.\n"
+                },
+                "roleName": {
+                    "type": "object",
+                    "$ref": "#/types/azuredevops-extensions:index:RoleName",
+                    "description": "The name of the role assigned.\n"
+                }
+            },
+            "requiredInputs": [
+                "resourceId",
+                "identityId",
+                "scopeName",
+                "userId",
+                "roleName"
+            ]
+        },
         "azuredevops-extensions:index:PipelineEnvironment": {
             "properties": {
                 "name": {
@@ -90,6 +154,28 @@
         }
     },
     "types": {
+        "azuredevops-extensions:index:RoleName": {
+            "type": "string",
+            "enum": [
+                {
+                    "value": "Reader"
+                },
+                {
+                    "value": "Administrator"
+                },
+                {
+                    "value": "User"
+                }
+            ]
+        },
+        "azuredevops-extensions:index:ScopeName": {
+            "type": "string",
+            "enum": [
+                {
+                    "value": "VariableGroup"
+                }
+            ]
+        },
         "azuredevops-extensions:index:KubernetesResource": {
             "properties": {
                 "name": {
