@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
@@ -12,6 +13,9 @@ import (
 
 var AzureDevopsResources = []AzureDevopsResource{
 	&AzureDevopsEnvironmentResource{},
+	&AzureDevopsRoleAssignmentResource{},
+	&AzureDevopsBuildFolderResource{},
+	&AzureDevopsBuildFolderPermissionsResource{},
 }
 
 type AzureDevopsResource interface {
@@ -96,4 +100,11 @@ func (sc *AzureDevopsConfig) getNumberOfAttempts() (*int, error) {
 	}
 
 	return &numberOfAttempts, nil
+}
+
+func MarshalAzureDevopsError(data []byte) (AzureDevopsError, error) {
+	azError := AzureDevopsError{}
+	err := json.Unmarshal(data, &azError)
+
+	return azError, err
 }

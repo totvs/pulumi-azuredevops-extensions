@@ -13,11 +13,15 @@
         "strict": true
     },
     "files": [
+        "buildFolder.ts",
+        "buildFolderPermissions.ts",
         "config/index.ts",
         "config/vars.ts",
         "index.ts",
         "pipelineEnvironment.ts",
         "provider.ts",
+        "roleAssignment.ts",
+        "types/enums/index.ts",
         "types/index.ts",
         "types/input.ts",
         "types/output.ts",

@@ -20,8 +20,14 @@ func (m *module) Version() semver.Version {
 
 func (m *module) Construct(ctx *pulumi.Context, name, typ, urn string) (r pulumi.Resource, err error) {
 	switch typ {
+	case "azuredevops-extensions:index:BuildFolder":
+		r = &BuildFolder{}
+	case "azuredevops-extensions:index:BuildFolderPermissions":
+		r = &BuildFolderPermissions{}
 	case "azuredevops-extensions:index:PipelineEnvironment":
 		r = &PipelineEnvironment{}
+	case "azuredevops-extensions:index:RoleAssignment":
+		r = &RoleAssignment{}
 	default:
 		return nil, fmt.Errorf("unknown resource type: %s", typ)
 	}

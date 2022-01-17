@@ -38,15 +38,6 @@ wget https://github.com/totvs/pulumi-azuredevops-extensions/releases/download/v0
 pulumi plugin install resource azuredevops-extensions 0.0.2 -f pulumi-resource-azuredevops-extensions-v0.0.2-alpha.1636747691+bb5b83c8-linux-amd64.tar.gz
 ```
 
-# Import
-
-## Build pipeline folder import
-To import build pipeline folder, use the following format ```<azuredevops-project-id>\/<folder-name>```. Example:
-
-```sh
-pulumi import 'azuredevops-extensions:index:BuildFolder' 'totvsapps-dev-folder' '5687c295-d324-41c7-a430-5a50f190a0c1\/totvsapps-dev'
-```
-
 # Usage
 See the example in go language [here](https://github.com/totvs/pulumi-azuredevops-extensions/tree/master/examples/go).
 

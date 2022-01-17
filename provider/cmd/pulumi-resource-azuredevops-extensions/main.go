@@ -22,5 +22,5 @@ import (
 var providerName = "azuredevops-extensions"
 
 func main() {
-	provider.Serve(providerName, version.Version)
+	provider.Serve(providerName, pulumiSchema, version.Version)
 }

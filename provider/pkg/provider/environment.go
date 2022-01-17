@@ -235,7 +235,17 @@ func (c *AzureDevopsEnvironmentResource) createEnvironmentPipeline(input AzureDe
 		Post(url)
 
 	if err != nil || resp.StatusCode() != 200 {
-		return nil, fmt.Errorf("error creating environment pipeline [%s/%s/%s]': %s", input.ProjectId, input.Name, resp.Status(), err)
+		message := ""
+		azError, err := MarshalAzureDevopsError(resp.Body())
+		if err == nil {
+			message = azError.Message
+		}
+		return nil, fmt.Errorf("error creating environment pipeline [%s/%s/%s]': %s",
+			input.ProjectId,
+			input.Name,
+			resp.Status(),
+			message,
+		)
 	}
 
 	var result map[string]interface{}
@@ -286,10 +296,15 @@ func (c *AzureDevopsEnvironmentResource) createResourceEnvironmentPipeline(
 	}
 
 	client := resty.New()
-	url := fmt.Sprintf("%s/%s/_apis/distributedtask/environments/%d/providers/kubernetes", *urlOrg, projectId, environmentId)
+	url := fmt.Sprintf(
+		"%s/{projectId}/_apis/distributedtask/environments/{environmentId}/providers/kubernetes",
+		*urlOrg,
+	)
 	resp, err := client.R().
 		SetBasicAuth("pat", *pat).
 		SetQueryString("api-version=6.1-preview.1").
+		SetPathParam("projectId", projectId).
+		SetPathParam("environmentId", strconv.Itoa(environmentId)).
 		SetBody(map[string]interface{}{
 			"name":              name,
 			"clusterName":       clusterName,
@@ -316,8 +331,19 @@ func (c *AzureDevopsEnvironmentResource) createResourceEnvironmentPipeline(
 				numberOfAttempts,
 			)
 		}
+		message := ""
+		azError, err := MarshalAzureDevopsError(resp.Body())
+		if err == nil {
+			message = azError.Message
+		}
 
-		return nil, fmt.Errorf("error creating resource environment pipeline [%s/%s/%s/%s]: %s", projectId, serviceEndpointId, name, resp.Status(), err)
+		return nil, fmt.Errorf("error creating resource environment pipeline [%s/%s/%s/%s]: %s",
+			projectId,
+			serviceEndpointId,
+			name,
+			resp.Status(),
+			message,
+		)
 	}
 
 	var result map[string]interface{}
@@ -339,14 +365,29 @@ func (c *AzureDevopsEnvironmentResource) removeEnvironmentPipeline(environmentId
 	}
 
 	client := resty.New()
-	url := fmt.Sprintf("%s/%s/_apis/distributedtask/environments/%d", *urlOrg, projectId, environmentId)
+	url := fmt.Sprintf(
+		"%s/{projectId}/_apis/distributedtask/environments/{environmentId}",
+		*urlOrg,
+	)
 	resp, err := client.R().
 		SetBasicAuth("pat", *pat).
+		SetPathParam("projectId", projectId).
+		SetPathParam("environmentId", strconv.Itoa(environmentId)).
 		SetQueryString("api-version=6.0-preview.1").
 		Delete(url)
 
 	if err != nil || resp.StatusCode() != 204 {
-		return fmt.Errorf("error removing enviroment pipeline [%s/%d/%s]: %s", projectId, environmentId, resp.Status(), err)
+		message := ""
+		azError, err := MarshalAzureDevopsError(resp.Body())
+		if err == nil {
+			message = azError.Message
+		}
+		return fmt.Errorf("error removing enviroment pipeline [%s/%d/%s]: %s",
+			projectId,
+			environmentId,
+			resp.Status(),
+			message,
+		)
 	}
 
 	return nil
@@ -368,9 +409,14 @@ func (c *AzureDevopsEnvironmentResource) updateEnvironmentPipeline(
 	}
 
 	client := resty.New()
-	url := fmt.Sprintf("%s/%s/_apis/distributedtask/environments/%d?api-version=6.0-preview.1", *urlOrg, new.ProjectId, environmentId)
+	url := fmt.Sprintf(
+		"%s/{projectId}/_apis/distributedtask/environments/{environmentId}?api-version=6.0-preview.1",
+		*urlOrg,
+	)
 	resp, err := client.R().
 		SetBasicAuth("pat", *pat).
+		SetPathParam("projectId", new.ProjectId).
+		SetPathParam("environmentId", strconv.Itoa(environmentId)).
 		SetQueryString("api-version=6.0-preview.1").
 		SetBody(map[string]interface{}{
 			"name": new.Name,
@@ -378,7 +424,17 @@ func (c *AzureDevopsEnvironmentResource) updateEnvironmentPipeline(
 		Patch(url)
 
 	if err != nil || resp.StatusCode() != 200 {
-		return fmt.Errorf("error updating enviroment [%s/%d/%s]: %s", new.ProjectId, environmentId, resp.Status(), err)
+		message := ""
+		azError, err := MarshalAzureDevopsError(resp.Body())
+		if err == nil {
+			message = azError.Message
+		}
+		return fmt.Errorf("error updating enviroment [%s/%d/%s]: %s",
+			new.ProjectId,
+			environmentId,
+			resp.Status(),
+			message,
+		)
 	}
 
 	return nil

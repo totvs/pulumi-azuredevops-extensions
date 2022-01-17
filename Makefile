@@ -8,7 +8,7 @@ NUGET_PKG_NAME   := Pulumi.AzuredevopsExtensions
 
 PROVIDER        := pulumi-resource-${PACK}
 CODEGEN         := pulumi-gen-${PACK}
-VERSION         ?= $(shell pulumictl get version)
+VERSION         ?= $(shell pulumictl get version -o)
 PROVIDER_PATH   := provider
 VERSION_PATH     := ${PROVIDER_PATH}/pkg/version.Version
 
@@ -36,7 +36,7 @@ provider_debug::
 test_provider::
 	cd provider/pkg && go test -short -v -count=1 -cover -timeout 2h -parallel ${TESTPARALLELISM} ./...
 
-dotnet_sdk:: DOTNET_VERSION := $(shell pulumictl get version --language dotnet)
+dotnet_sdk:: DOTNET_VERSION := $(shell pulumictl get version -o --language dotnet)
 dotnet_sdk::
 	rm -rf sdk/dotnet
 	$(WORKING_DIR)/bin/$(CODEGEN) -version=${DOTNET_VERSION} dotnet $(SCHEMA_FILE) $(CURDIR)
@@ -48,7 +48,7 @@ go_sdk::
 	rm -rf sdk/go
 	$(WORKING_DIR)/bin/$(CODEGEN) -version=${VERSION} go $(SCHEMA_FILE) $(CURDIR)
 
-nodejs_sdk:: VERSION := $(shell pulumictl get version --language javascript)
+nodejs_sdk:: VERSION := $(shell pulumictl get version -o --language javascript)
 nodejs_sdk::
 	rm -rf sdk/nodejs
 	$(WORKING_DIR)/bin/$(CODEGEN) -version=${VERSION} nodejs $(SCHEMA_FILE) $(CURDIR)
@@ -58,7 +58,7 @@ nodejs_sdk::
 	cp README.md LICENSE ${PACKDIR}/nodejs/package.json ${PACKDIR}/nodejs/yarn.lock ${PACKDIR}/nodejs/bin/
 	sed -i.bak 's/$${VERSION}/$(VERSION)/g' ${PACKDIR}/nodejs/bin/package.json
 
-python_sdk:: PYPI_VERSION := $(shell pulumictl get version --language python)
+python_sdk:: PYPI_VERSION := $(shell pulumictl get version -o --language python)
 python_sdk::
 	rm -rf sdk/python
 	$(WORKING_DIR)/bin/$(CODEGEN) -version=${VERSION} python $(SCHEMA_FILE) $(CURDIR)
