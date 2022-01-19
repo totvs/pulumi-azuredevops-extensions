@@ -63,41 +63,37 @@ func (c *AzureDevopsRoleAssignmentResource) Configure(config AzureDevopsConfig) 
 }
 
 func (c *AzureDevopsRoleAssignmentResource) Diff(req *pulumirpc.DiffRequest) (*pulumirpc.DiffResponse, error) {
-	return nil, nil
-	// olds, err := plugin.UnmarshalProperties(req.GetOlds(), plugin.MarshalOptions{KeepUnknowns: false, SkipNulls: true})
-	// if err != nil {
-	// 	return nil, err
-	// }
+	olds, err := plugin.UnmarshalProperties(req.GetOlds(), plugin.MarshalOptions{KeepUnknowns: false, SkipNulls: true})
+	if err != nil {
+		return nil, err
+	}
 
-	// news, err := plugin.UnmarshalProperties(req.GetNews(), plugin.MarshalOptions{KeepUnknowns: true, SkipNulls: false})
-	// if err != nil {
-	// 	return nil, err
-	// }
+	news, err := plugin.UnmarshalProperties(req.GetNews(), plugin.MarshalOptions{KeepUnknowns: true, SkipNulls: false})
+	if err != nil {
+		return nil, err
+	}
 
-	// diffs := olds["__inputs"].ObjectValue().Diff(news)
-	// if diffs == nil {
-	// 	return &pulumirpc.DiffResponse{
-	// 		Changes:             pulumirpc.DiffResponse_DIFF_NONE,
-	// 		Replaces:            []string{},
-	// 		Stables:             []string{},
-	// 		DeleteBeforeReplace: false,
-	// 	}, nil
-	// }
+	diffs := olds["__inputs"].ObjectValue().Diff(news)
+	if diffs == nil {
+		return &pulumirpc.DiffResponse{
+			Changes:             pulumirpc.DiffResponse_DIFF_NONE,
+			Replaces:            []string{},
+			Stables:             []string{},
+			DeleteBeforeReplace: false,
+		}, nil
+	}
 
-	// var replaces []string
-	// if diffs.Changed("projectId") {
-	// 	replaces = append(replaces, "projectId")
-	// }
-	// if diffs.Changed("kubernetesResources") {
-	// 	replaces = append(replaces, "kubernetesResources")
-	// }
+	var replaces []string
+	if diffs.Changed("roleName") {
+		replaces = append(replaces, "roleName")
+	}
 
-	// return &pulumirpc.DiffResponse{
-	// 	Changes:             pulumirpc.DiffResponse_DIFF_SOME,
-	// 	Replaces:            replaces,
-	// 	Stables:             []string{},
-	// 	DeleteBeforeReplace: true,
-	// }, nil
+	return &pulumirpc.DiffResponse{
+		Changes:             pulumirpc.DiffResponse_DIFF_SOME,
+		Replaces:            replaces,
+		Stables:             []string{},
+		DeleteBeforeReplace: true,
+	}, nil
 }
 
 func (c *AzureDevopsRoleAssignmentResource) Create(req *pulumirpc.CreateRequest) (*pulumirpc.CreateResponse, error) {
@@ -144,45 +140,7 @@ func (k *AzureDevopsRoleAssignmentResource) Check(req *pulumirpc.CheckRequest) (
 }
 
 func (k *AzureDevopsRoleAssignmentResource) Update(req *pulumirpc.UpdateRequest) (*pulumirpc.UpdateResponse, error) {
-	return nil, nil
-	// inputsOld, err := plugin.UnmarshalProperties(req.GetOlds(), plugin.MarshalOptions{KeepUnknowns: true, SkipNulls: true})
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// inputsNew, err := plugin.UnmarshalProperties(req.GetNews(), plugin.MarshalOptions{KeepUnknowns: true, SkipNulls: true})
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// oldEnvironment := k.ToAzureDevopsRoleAssignmentInput(inputsOld["__inputs"].ObjectValue())
-	// newEnvironment := k.ToAzureDevopsRoleAssignmentInput(inputsNew)
-	// environmentId, err := strconv.Atoi(req.Id)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("error parsing enviroment to int [%s/%s]: %s", newEnvironment.ProjectId, req.Id, err.Error())
-	// }
-
-	// err = k.updateEnvironmentPipeline(
-	// 	environmentId,
-	// 	oldEnvironment,
-	// 	newEnvironment,
-	// )
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// outputStore := resource.PropertyMap{}
-	// outputStore["__inputs"] = resource.NewObjectProperty(inputsNew)
-
-	// outputProperties, err := plugin.MarshalProperties(
-	// 	outputStore,
-	// 	plugin.MarshalOptions{KeepUnknowns: true, SkipNulls: true},
-	// )
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// return &pulumirpc.UpdateResponse{
-	// 	Properties: outputProperties,
-	// }, nil
+	return nil, fmt.Errorf("not implemented")
 }
 
 func (k *AzureDevopsRoleAssignmentResource) Read(req *pulumirpc.ReadRequest) (*pulumirpc.ReadResponse, error) {
@@ -216,7 +174,6 @@ func (r *AzureDevopsRoleAssignmentResource) ToAzureDevopsRoleAssignmentInput(inp
 }
 
 func (c *AzureDevopsRoleAssignmentResource) setRoleAssignment(input AzureDevopsRoleAssignmentInput) (*string, error) {
-
 	urlOrg, err := c.config.getOrgServiceUrl()
 	if err != nil {
 		return nil, err
@@ -308,130 +265,3 @@ func (c *AzureDevopsRoleAssignmentResource) removeRoleAssignment(input AzureDevo
 
 	return nil
 }
-
-// func (c *AzureDevopsRoleAssignmentResource) createRoleAssignmentId(
-// 	scopeName ScopeNameInput,
-// 	resourceId string,
-// 	identityId string,
-// 	roleName RoleNameInput,
-// 	userId string) string {
-// 	return fmt.Sprintf("%s/%s/%s/%s/%s", scopeName, resourceId, identityId, roleName, userId)
-// }
-
-// func (c *AzureDevopsRoleAssignmentsResource) createResourceEnvironmentPipeline(
-// 	name string,
-// 	projectId string,
-// 	environmentId int,
-// 	clusterName string,
-// 	namespace string,
-// 	serviceEndpointId string,
-// 	numberOfAttempts int) (*int, error) {
-
-// 	urlOrg, err := c.config.getOrgServiceUrl()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	pat, err := c.config.getPersonalAccessToken()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	client := resty.New()
-// 	url := fmt.Sprintf("%s/%s/_apis/distributedtask/environments/%d/providers/kubernetes", *urlOrg, projectId, environmentId)
-// 	resp, err := client.R().
-// 		SetBasicAuth("pat", *pat).
-// 		SetQueryString("api-version=6.1-preview.1").
-// 		SetBody(map[string]interface{}{
-// 			"name":              name,
-// 			"clusterName":       clusterName,
-// 			"namespace":         namespace,
-// 			"serviceEndpointId": serviceEndpointId,
-// 		}).
-// 		Post(url)
-
-// 	if err != nil || resp.StatusCode() > 399 {
-// 		if c.amountOfTrial < numberOfAttempts {
-// 			c.amountOfTrial++
-
-// 			c.exponentialBackoff *= 2
-// 			fmt.Printf("try #%d, next attempt on %f seconds\n", c.amountOfTrial, c.exponentialBackoff.Seconds())
-// 			time.Sleep(c.exponentialBackoff)
-
-// 			return c.createResourceEnvironmentPipeline(
-// 				name,
-// 				projectId,
-// 				environmentId,
-// 				clusterName,
-// 				namespace,
-// 				serviceEndpointId,
-// 				numberOfAttempts,
-// 			)
-// 		}
-
-// 		return nil, fmt.Errorf("error creating resource environment pipeline [%s/%s/%s/%s]: %s", projectId, serviceEndpointId, name, resp.Status(), err)
-// 	}
-
-// 	var result map[string]interface{}
-// 	json.Unmarshal([]byte(resp.Body()), &result)
-// 	id := int(result["id"].(float64))
-
-// 	return &id, err
-// }
-
-// func (c *AzureDevopsRoleAssignmentsResource) removeEnvironmentPipeline(environmentId int, projectId string) error {
-// 	urlOrg, err := c.config.getOrgServiceUrl()
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	pat, err := c.config.getPersonalAccessToken()
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	client := resty.New()
-// 	url := fmt.Sprintf("%s/%s/_apis/distributedtask/environments/%d", *urlOrg, projectId, environmentId)
-// 	resp, err := client.R().
-// 		SetBasicAuth("pat", *pat).
-// 		SetQueryString("api-version=6.0-preview.1").
-// 		Delete(url)
-
-// 	if err != nil || resp.StatusCode() != 204 {
-// 		return fmt.Errorf("error removing enviroment pipeline [%s/%d/%s]: %s", projectId, environmentId, resp.Status(), err)
-// 	}
-
-// 	return nil
-// }
-
-// func (c *AzureDevopsRoleAssignmentsResource) updateEnvironmentPipeline(
-// 	environmentId int,
-// 	old AzureDevopsEnvironmentInput,
-// 	new AzureDevopsEnvironmentInput) (err error) {
-
-// 	urlOrg, err := c.config.getOrgServiceUrl()
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	pat, err := c.config.getPersonalAccessToken()
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	client := resty.New()
-// 	url := fmt.Sprintf("%s/%s/_apis/distributedtask/environments/%d?api-version=6.0-preview.1", *urlOrg, new.ProjectId, environmentId)
-// 	resp, err := client.R().
-// 		SetBasicAuth("pat", *pat).
-// 		SetQueryString("api-version=6.0-preview.1").
-// 		SetBody(map[string]interface{}{
-// 			"name": new.Name,
-// 		}).
-// 		Patch(url)
-
-// 	if err != nil || resp.StatusCode() != 200 {
-// 		return fmt.Errorf("error updating enviroment [%s/%d/%s]: %s", new.ProjectId, environmentId, resp.Status(), err)
-// 	}
-
-// 	return nil
-// }
