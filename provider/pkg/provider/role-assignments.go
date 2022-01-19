@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 
 	resty "github.com/go-resty/resty/v2"
 	pbempty "github.com/golang/protobuf/ptypes/empty"
@@ -20,12 +22,17 @@ type ScopeNameInput string
 
 type RoleNameInput string
 
+type RoleAssignment struct {
+	RoleName string `json:"roleName"`
+	UserId   string `json:"userId"`
+}
+
 type AzureDevopsRoleAssignmentInput struct {
-	ResourceId string
-	IdentityId string
-	ScopeName  ScopeNameInput
-	UserId     string
-	RoleName   RoleNameInput
+	ResourceId string         `json:"resourceId"`
+	IdentityId string         `json:"identityId"`
+	ScopeName  ScopeNameInput `json:"scopeName"`
+	UserId     string         `json:"userId"`
+	RoleName   RoleNameInput  `json:"roleName"`
 }
 
 const (
@@ -99,13 +106,8 @@ func (c *AzureDevopsRoleAssignmentResource) Create(req *pulumirpc.CreateRequest)
 		return nil, err
 	}
 
-	numberOfAttempts, err := c.config.getNumberOfAttempts()
-	if err != nil {
-		return nil, err
-	}
-
 	inputsRoleAssignment := c.ToAzureDevopsRoleAssignmentInput(inputs)
-	roleAssignmentId, err := c.createRoleAssignment(inputsRoleAssignment, *numberOfAttempts)
+	roleAssignmentId, err := c.setRoleAssignment(inputsRoleAssignment)
 	if err != nil {
 		return nil, err
 	}
@@ -128,19 +130,13 @@ func (c *AzureDevopsRoleAssignmentResource) Create(req *pulumirpc.CreateRequest)
 }
 
 func (c *AzureDevopsRoleAssignmentResource) Delete(req *pulumirpc.DeleteRequest) (*pbempty.Empty, error) {
-	return nil, nil
-	// inputs, err := plugin.UnmarshalProperties(req.GetProperties(), plugin.MarshalOptions{KeepUnknowns: true, SkipNulls: true})
-	// if err != nil {
-	// 	return nil, err
-	// }
+	var input AzureDevopsRoleAssignmentInput
+	err := json.Unmarshal([]byte(req.Id), &input)
+	if err != nil {
+		return nil, err
+	}
 
-	// inputsEnviroment := c.ToAzureDevopsRoleAssignmentInput(inputs["__inputs"].ObjectValue())
-	// environmentId, err := strconv.Atoi(req.Id)
-	// if err != nil {
-	// 	return &pbempty.Empty{}, err
-	// }
-
-	// return &pbempty.Empty{}, c.removeEnvironmentPipeline(environmentId, inputsEnviroment.ProjectId)
+	return &pbempty.Empty{}, c.removeRoleAssignment(input)
 }
 
 func (k *AzureDevopsRoleAssignmentResource) Check(req *pulumirpc.CheckRequest) (*pulumirpc.CheckResponse, error) {
@@ -219,7 +215,7 @@ func (r *AzureDevopsRoleAssignmentResource) ToAzureDevopsRoleAssignmentInput(inp
 	return input
 }
 
-func (c *AzureDevopsRoleAssignmentResource) createRoleAssignment(input AzureDevopsRoleAssignmentInput, numberOfAttempts int) (*string, error) {
+func (c *AzureDevopsRoleAssignmentResource) setRoleAssignment(input AzureDevopsRoleAssignmentInput) (*string, error) {
 
 	urlOrg, err := c.config.getOrgServiceUrl()
 	if err != nil {
@@ -233,7 +229,7 @@ func (c *AzureDevopsRoleAssignmentResource) createRoleAssignment(input AzureDevo
 
 	client := resty.New()
 	url := fmt.Sprintf(
-		"%s/_apis/securityroles/scopes/%s/roleassignments/resources/%s/%s",
+		"%s/_apis/securityroles/scopes/%s/roleassignments/resources/%s$%s",
 		*urlOrg,
 		input.ScopeName.GetScopeId(),
 		input.ResourceId,
@@ -241,15 +237,15 @@ func (c *AzureDevopsRoleAssignmentResource) createRoleAssignment(input AzureDevo
 	resp, err := client.R().
 		SetBasicAuth("pat", *pat).
 		SetQueryString("api-version=6.1-preview.1").
-		SetBody(map[string]interface{}{
-			"roleName": input.RoleName,
-			"userId":   input.UserId,
-		}).
+		SetBody([]RoleAssignment{{
+			RoleName: string(input.RoleName),
+			UserId:   input.UserId,
+		}}).
 		Put(url)
 
 	if err != nil || resp.StatusCode() != 200 {
 		return nil, fmt.Errorf(
-			"error creating role assignment [%s, %s, %s, %s, %s/%s/%s]': %s",
+			"error creating role assignment [%s, %s, %s, %s, %s, %s, %s]': %s",
 			*urlOrg,
 			input.ScopeName.GetScopeId(),
 			input.ResourceId,
@@ -260,14 +256,67 @@ func (c *AzureDevopsRoleAssignmentResource) createRoleAssignment(input AzureDevo
 			err)
 	}
 
-	id := c.createRoleAssignmentId(input.RoleName, input.UserId)
+	id := c.createRoleAssignmentId(input)
 
 	return &id, err
 }
 
-func (c *AzureDevopsRoleAssignmentResource) createRoleAssignmentId(roleName RoleNameInput, userId string) string {
-	return fmt.Sprintf("%s/%s", roleName, userId)
+func (c *AzureDevopsRoleAssignmentResource) createRoleAssignmentId(input AzureDevopsRoleAssignmentInput) string {
+	data, err := json.Marshal(input)
+	if err != nil {
+		log.Fatal("error marshalling role assignment input: ", err)
+	}
+
+	return string(data)
 }
+
+func (c *AzureDevopsRoleAssignmentResource) removeRoleAssignment(input AzureDevopsRoleAssignmentInput) error {
+	urlOrg, err := c.config.getOrgServiceUrl()
+	if err != nil {
+		return err
+	}
+
+	pat, err := c.config.getPersonalAccessToken()
+	if err != nil {
+		return err
+	}
+
+	client := resty.New()
+	url := fmt.Sprintf(
+		"%s/_apis/securityroles/scopes/%s/roleassignments/resources/%s$%s",
+		*urlOrg,
+		input.ScopeName.GetScopeId(),
+		input.ResourceId,
+		input.IdentityId)
+	resp, err := client.R().
+		SetBasicAuth("pat", *pat).
+		SetQueryString("api-version=6.1-preview.1").
+		SetBody([]string{input.UserId}).
+		Patch(url)
+
+	if err != nil || resp.StatusCode() != 204 {
+		return fmt.Errorf(
+			"error creating role assignment [%s, %s, %s, %s, %s, %s]': %s",
+			*urlOrg,
+			input.ScopeName.GetScopeId(),
+			input.ResourceId,
+			input.IdentityId,
+			input.UserId,
+			resp.Status(),
+			err)
+	}
+
+	return nil
+}
+
+// func (c *AzureDevopsRoleAssignmentResource) createRoleAssignmentId(
+// 	scopeName ScopeNameInput,
+// 	resourceId string,
+// 	identityId string,
+// 	roleName RoleNameInput,
+// 	userId string) string {
+// 	return fmt.Sprintf("%s/%s/%s/%s/%s", scopeName, resourceId, identityId, roleName, userId)
+// }
 
 // func (c *AzureDevopsRoleAssignmentsResource) createResourceEnvironmentPipeline(
 // 	name string,
