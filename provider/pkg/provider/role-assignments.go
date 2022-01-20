@@ -28,11 +28,15 @@ type RoleAssignment struct {
 }
 
 type AzureDevopsRoleAssignmentInput struct {
+	Id       AzureDevopsRoleAssignmentId `json:"id"`
+	RoleName RoleNameInput               `json:"roleName"`
+}
+
+type AzureDevopsRoleAssignmentId struct {
 	ResourceId string         `json:"resourceId"`
 	IdentityId string         `json:"identityId"`
 	ScopeName  ScopeNameInput `json:"scopeName"`
 	UserId     string         `json:"userId"`
-	RoleName   RoleNameInput  `json:"roleName"`
 }
 
 const (
@@ -126,7 +130,7 @@ func (c *AzureDevopsRoleAssignmentResource) Create(req *pulumirpc.CreateRequest)
 }
 
 func (c *AzureDevopsRoleAssignmentResource) Delete(req *pulumirpc.DeleteRequest) (*pbempty.Empty, error) {
-	var input AzureDevopsRoleAssignmentInput
+	var input AzureDevopsRoleAssignmentId
 	err := json.Unmarshal([]byte(req.Id), &input)
 	if err != nil {
 		return nil, err
@@ -151,19 +155,19 @@ func (r *AzureDevopsRoleAssignmentResource) ToAzureDevopsRoleAssignmentInput(inp
 	input := AzureDevopsRoleAssignmentInput{}
 
 	if inputMap["resourceId"].HasValue() && inputMap["resourceId"].IsString() {
-		input.ResourceId = inputMap["resourceId"].StringValue()
+		input.Id.ResourceId = inputMap["resourceId"].StringValue()
 	}
 
 	if inputMap["identityId"].HasValue() && inputMap["identityId"].IsString() {
-		input.IdentityId = inputMap["identityId"].StringValue()
+		input.Id.IdentityId = inputMap["identityId"].StringValue()
 	}
 
 	if inputMap["scopeName"].HasValue() && inputMap["scopeName"].IsString() {
-		input.ScopeName = ScopeNameInput(inputMap["scopeName"].StringValue())
+		input.Id.ScopeName = ScopeNameInput(inputMap["scopeName"].StringValue())
 	}
 
 	if inputMap["userId"].HasValue() && inputMap["userId"].IsString() {
-		input.UserId = inputMap["userId"].StringValue()
+		input.Id.UserId = inputMap["userId"].StringValue()
 	}
 
 	if inputMap["roleName"].HasValue() && inputMap["roleName"].IsString() {
@@ -188,15 +192,15 @@ func (c *AzureDevopsRoleAssignmentResource) setRoleAssignment(input AzureDevopsR
 	url := fmt.Sprintf(
 		"%s/_apis/securityroles/scopes/%s/roleassignments/resources/%s$%s",
 		*urlOrg,
-		input.ScopeName.GetScopeId(),
-		input.ResourceId,
-		input.IdentityId)
+		input.Id.ScopeName.GetScopeId(),
+		input.Id.ResourceId,
+		input.Id.IdentityId)
 	resp, err := client.R().
 		SetBasicAuth("pat", *pat).
 		SetQueryString("api-version=6.1-preview.1").
 		SetBody([]RoleAssignment{{
 			RoleName: string(input.RoleName),
-			UserId:   input.UserId,
+			UserId:   input.Id.UserId,
 		}}).
 		Put(url)
 
@@ -204,21 +208,21 @@ func (c *AzureDevopsRoleAssignmentResource) setRoleAssignment(input AzureDevopsR
 		return nil, fmt.Errorf(
 			"error creating role assignment [%s, %s, %s, %s, %s, %s, %s]': %s",
 			*urlOrg,
-			input.ScopeName.GetScopeId(),
-			input.ResourceId,
-			input.IdentityId,
+			input.Id.ScopeName.GetScopeId(),
+			input.Id.ResourceId,
+			input.Id.IdentityId,
 			input.RoleName,
-			input.UserId,
+			input.Id.UserId,
 			resp.Status(),
 			err)
 	}
 
-	id := c.createRoleAssignmentId(input)
+	id := c.createRoleAssignmentId(input.Id)
 
 	return &id, err
 }
 
-func (c *AzureDevopsRoleAssignmentResource) createRoleAssignmentId(input AzureDevopsRoleAssignmentInput) string {
+func (c *AzureDevopsRoleAssignmentResource) createRoleAssignmentId(input AzureDevopsRoleAssignmentId) string {
 	data, err := json.Marshal(input)
 	if err != nil {
 		log.Fatal("error marshalling role assignment input: ", err)
@@ -227,7 +231,7 @@ func (c *AzureDevopsRoleAssignmentResource) createRoleAssignmentId(input AzureDe
 	return string(data)
 }
 
-func (c *AzureDevopsRoleAssignmentResource) removeRoleAssignment(input AzureDevopsRoleAssignmentInput) error {
+func (c *AzureDevopsRoleAssignmentResource) removeRoleAssignment(roleAssignmentId AzureDevopsRoleAssignmentId) error {
 	urlOrg, err := c.config.getOrgServiceUrl()
 	if err != nil {
 		return err
@@ -242,23 +246,23 @@ func (c *AzureDevopsRoleAssignmentResource) removeRoleAssignment(input AzureDevo
 	url := fmt.Sprintf(
 		"%s/_apis/securityroles/scopes/%s/roleassignments/resources/%s$%s",
 		*urlOrg,
-		input.ScopeName.GetScopeId(),
-		input.ResourceId,
-		input.IdentityId)
+		roleAssignmentId.ScopeName.GetScopeId(),
+		roleAssignmentId.ResourceId,
+		roleAssignmentId.IdentityId)
 	resp, err := client.R().
 		SetBasicAuth("pat", *pat).
 		SetQueryString("api-version=6.1-preview.1").
-		SetBody([]string{input.UserId}).
+		SetBody([]string{roleAssignmentId.UserId}).
 		Patch(url)
 
 	if err != nil || resp.StatusCode() != 204 {
 		return fmt.Errorf(
 			"error creating role assignment [%s, %s, %s, %s, %s, %s]': %s",
 			*urlOrg,
-			input.ScopeName.GetScopeId(),
-			input.ResourceId,
-			input.IdentityId,
-			input.UserId,
+			roleAssignmentId.ScopeName.GetScopeId(),
+			roleAssignmentId.ResourceId,
+			roleAssignmentId.IdentityId,
+			roleAssignmentId.UserId,
 			resp.Status(),
 			err)
 	}
