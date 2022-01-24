@@ -40,7 +40,8 @@ type AzureDevopsRoleAssignmentId struct {
 }
 
 const (
-	VariableGroup ScopeNameInput = "VariableGroup"
+	VariableGroup   ScopeNameInput = "VariableGroup"
+	ServiceEndpoint ScopeNameInput = "ServiceEndpoint"
 )
 
 const (
@@ -53,6 +54,8 @@ func (a *ScopeNameInput) GetScopeId() string {
 	switch *a {
 	case VariableGroup:
 		return "distributedtask.variablegroup"
+	case ServiceEndpoint:
+		return "distributedtask.serviceendpointrole"
 	}
 
 	return ""
@@ -94,7 +97,7 @@ func (c *AzureDevopsRoleAssignmentResource) Diff(req *pulumirpc.DiffRequest) (*p
 
 	return &pulumirpc.DiffResponse{
 		Changes:             pulumirpc.DiffResponse_DIFF_SOME,
-		Replaces:            replaces,
+		Diffs:               replaces,
 		Stables:             []string{},
 		DeleteBeforeReplace: true,
 	}, nil
@@ -139,12 +142,36 @@ func (c *AzureDevopsRoleAssignmentResource) Delete(req *pulumirpc.DeleteRequest)
 	return &pbempty.Empty{}, c.removeRoleAssignment(input)
 }
 
-func (k *AzureDevopsRoleAssignmentResource) Check(req *pulumirpc.CheckRequest) (*pulumirpc.CheckResponse, error) {
+func (c *AzureDevopsRoleAssignmentResource) Check(req *pulumirpc.CheckRequest) (*pulumirpc.CheckResponse, error) {
 	return &pulumirpc.CheckResponse{Inputs: req.News, Failures: nil}, nil
 }
 
-func (k *AzureDevopsRoleAssignmentResource) Update(req *pulumirpc.UpdateRequest) (*pulumirpc.UpdateResponse, error) {
-	return nil, fmt.Errorf("not implemented")
+func (c *AzureDevopsRoleAssignmentResource) Update(req *pulumirpc.UpdateRequest) (*pulumirpc.UpdateResponse, error) {
+	inputs, err := plugin.UnmarshalProperties(req.GetNews(), plugin.MarshalOptions{KeepUnknowns: true, SkipNulls: true})
+	if err != nil {
+		return nil, err
+	}
+
+	inputsRoleAssignment := c.ToAzureDevopsRoleAssignmentInput(inputs)
+	_, err = c.setRoleAssignment(inputsRoleAssignment)
+	if err != nil {
+		return nil, err
+	}
+
+	outputStore := resource.PropertyMap{}
+	outputStore["__inputs"] = resource.NewObjectProperty(inputs)
+
+	outputProperties, err := plugin.MarshalProperties(
+		outputStore,
+		plugin.MarshalOptions{},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pulumirpc.UpdateResponse{
+		Properties: outputProperties,
+	}, nil
 }
 
 func (k *AzureDevopsRoleAssignmentResource) Read(req *pulumirpc.ReadRequest) (*pulumirpc.ReadResponse, error) {
@@ -190,10 +217,11 @@ func (c *AzureDevopsRoleAssignmentResource) setRoleAssignment(input AzureDevopsR
 
 	client := resty.New()
 	url := fmt.Sprintf(
-		"%s/_apis/securityroles/scopes/%s/roleassignments/resources/%s$%s",
+		"%s/_apis/securityroles/scopes/%s/roleassignments/resources/%s%s%s",
 		*urlOrg,
 		input.Id.ScopeName.GetScopeId(),
 		input.Id.ResourceId,
+		c.getResourceSeparator(input.Id.ScopeName),
 		input.Id.IdentityId)
 	resp, err := client.R().
 		SetBasicAuth("pat", *pat).
@@ -244,10 +272,11 @@ func (c *AzureDevopsRoleAssignmentResource) removeRoleAssignment(roleAssignmentI
 
 	client := resty.New()
 	url := fmt.Sprintf(
-		"%s/_apis/securityroles/scopes/%s/roleassignments/resources/%s$%s",
+		"%s/_apis/securityroles/scopes/%s/roleassignments/resources/%s%s%s",
 		*urlOrg,
 		roleAssignmentId.ScopeName.GetScopeId(),
 		roleAssignmentId.ResourceId,
+		c.getResourceSeparator(roleAssignmentId.ScopeName),
 		roleAssignmentId.IdentityId)
 	resp, err := client.R().
 		SetBasicAuth("pat", *pat).
@@ -268,4 +297,15 @@ func (c *AzureDevopsRoleAssignmentResource) removeRoleAssignment(roleAssignmentI
 	}
 
 	return nil
+}
+
+func (c *AzureDevopsRoleAssignmentResource) getResourceSeparator(scope ScopeNameInput) string {
+	switch scope {
+	case VariableGroup:
+		return "$"
+	case ServiceEndpoint:
+		return "_"
+	}
+
+	return ""
 }

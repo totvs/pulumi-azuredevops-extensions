@@ -12,6 +12,7 @@ export type RoleName = (typeof RoleName)[keyof typeof RoleName];
 
 export const ScopeName = {
     VariableGroup: "VariableGroup",
+    ServiceEndpoint: "ServiceEndpoint",
 } as const;
 
 export type ScopeName = (typeof ScopeName)[keyof typeof ScopeName];

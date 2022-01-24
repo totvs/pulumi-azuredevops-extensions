@@ -47,6 +47,7 @@ namespace Pulumi.AzureDevopsExtensions
         }
 
         public static ScopeName VariableGroup { get; } = new ScopeName("VariableGroup");
+        public static ScopeName ServiceEndpoint { get; } = new ScopeName("ServiceEndpoint");
 
         public static bool operator ==(ScopeName left, ScopeName right) => left.Equals(right);
         public static bool operator !=(ScopeName left, ScopeName right) => !left.Equals(right);

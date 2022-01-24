@@ -178,7 +178,8 @@ func (in *roleNamePtr) ToRoleNamePtrOutputWithContext(ctx context.Context) RoleN
 type ScopeName string
 
 const (
-	ScopeNameVariableGroup = ScopeName("VariableGroup")
+	ScopeNameVariableGroup   = ScopeName("VariableGroup")
+	ScopeNameServiceEndpoint = ScopeName("ServiceEndpoint")
 )
 
 func (ScopeName) ElementType() reflect.Type {
