@@ -180,6 +180,7 @@ type ScopeName string
 const (
 	ScopeNameVariableGroup   = ScopeName("VariableGroup")
 	ScopeNameServiceEndpoint = ScopeName("ServiceEndpoint")
+	ScopeNameEnvironment     = ScopeName("Environment")
 )
 
 func (ScopeName) ElementType() reflect.Type {

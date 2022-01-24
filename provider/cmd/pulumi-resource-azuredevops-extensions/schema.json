@@ -176,6 +176,9 @@
                 },
                 {
                     "value": "ServiceEndpoint"
+                },
+                {
+                    "value": "Environment"
                 }
             ]
         },

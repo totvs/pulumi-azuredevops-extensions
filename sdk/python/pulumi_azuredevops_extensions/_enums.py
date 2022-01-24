@@ -19,3 +19,4 @@ class RoleName(str, Enum):
 class ScopeName(str, Enum):
     VARIABLE_GROUP = "VariableGroup"
     SERVICE_ENDPOINT = "ServiceEndpoint"
+    ENVIRONMENT = "Environment"

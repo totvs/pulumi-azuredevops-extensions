@@ -40,8 +40,9 @@ type AzureDevopsRoleAssignmentId struct {
 }
 
 const (
-	VariableGroup   ScopeNameInput = "VariableGroup"
-	ServiceEndpoint ScopeNameInput = "ServiceEndpoint"
+	ScopeVariableGroup   ScopeNameInput = "VariableGroup"
+	ScopeServiceEndpoint ScopeNameInput = "ServiceEndpoint"
+	ScopeEnvironment     ScopeNameInput = "Environment"
 )
 
 const (
@@ -52,10 +53,12 @@ const (
 
 func (a *ScopeNameInput) GetScopeId() string {
 	switch *a {
-	case VariableGroup:
+	case ScopeVariableGroup:
 		return "distributedtask.variablegroup"
-	case ServiceEndpoint:
+	case ScopeServiceEndpoint:
 		return "distributedtask.serviceendpointrole"
+	case ScopeEnvironment:
+		return "distributedtask.environmentreferencerole"
 	}
 
 	return ""
@@ -301,9 +304,11 @@ func (c *AzureDevopsRoleAssignmentResource) removeRoleAssignment(roleAssignmentI
 
 func (c *AzureDevopsRoleAssignmentResource) getResourceSeparator(scope ScopeNameInput) string {
 	switch scope {
-	case VariableGroup:
+	case ScopeVariableGroup:
 		return "$"
-	case ServiceEndpoint:
+	case ScopeServiceEndpoint:
+		return "_"
+	case ScopeEnvironment:
 		return "_"
 	}
 
