@@ -83,24 +83,42 @@ func (c *AzureDevopsRoleAssignmentResource) Diff(req *pulumirpc.DiffRequest) (*p
 		return nil, err
 	}
 
-	diffs := olds["__inputs"].ObjectValue().Diff(news)
-	if diffs == nil {
+	diffsInput := olds["__inputs"].ObjectValue().Diff(news)
+	if diffsInput == nil {
 		return &pulumirpc.DiffResponse{
 			Changes:             pulumirpc.DiffResponse_DIFF_NONE,
-			Replaces:            []string{},
-			Stables:             []string{},
 			DeleteBeforeReplace: false,
 		}, nil
 	}
 
+	var diffs []string
+	if diffsInput.Changed("roleName") {
+		diffs = append(diffs, "roleName")
+	}
+
 	var replaces []string
-	if diffs.Changed("roleName") {
-		replaces = append(replaces, "roleName")
+	if diffsInput.Changed("resourceId") {
+		replaces = append(replaces, "resourceId")
+	}
+	if diffsInput.Changed("identityId") {
+		replaces = append(replaces, "identityId")
+	}
+	if diffsInput.Changed("scopeName") {
+		replaces = append(replaces, "scopeName")
+	}
+	if diffsInput.Changed("userId") {
+		replaces = append(replaces, "userId")
+	}
+
+	if len(replaces) > 0 {
+		replaces = append(replaces, diffs...)
+		diffs = nil
 	}
 
 	return &pulumirpc.DiffResponse{
 		Changes:             pulumirpc.DiffResponse_DIFF_SOME,
-		Diffs:               replaces,
+		Replaces:            replaces,
+		Diffs:               diffs,
 		Stables:             []string{},
 		DeleteBeforeReplace: true,
 	}, nil
