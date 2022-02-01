@@ -5,6 +5,7 @@ import * as pulumi from "@pulumi/pulumi";
 import * as utilities from "./utilities";
 
 // Export members:
+export * from "./buildFolder";
 export * from "./pipelineEnvironment";
 export * from "./provider";
 export * from "./roleAssignment";
@@ -22,6 +23,7 @@ export {
 };
 
 // Import resources to register:
+import { BuildFolder } from "./buildFolder";
 import { PipelineEnvironment } from "./pipelineEnvironment";
 import { RoleAssignment } from "./roleAssignment";
 
@@ -29,6 +31,8 @@ const _module = {
     version: utilities.getVersion(),
     construct: (name: string, type: string, urn: string): pulumi.Resource => {
         switch (type) {
+            case "azuredevops-extensions:index:BuildFolder":
+                return new BuildFolder(name, <any>undefined, { urn })
             case "azuredevops-extensions:index:PipelineEnvironment":
                 return new PipelineEnvironment(name, <any>undefined, { urn })
             case "azuredevops-extensions:index:RoleAssignment":

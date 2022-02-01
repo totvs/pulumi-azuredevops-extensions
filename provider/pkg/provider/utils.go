@@ -13,6 +13,7 @@ import (
 var AzureDevopsResources = []AzureDevopsResource{
 	&AzureDevopsEnvironmentResource{},
 	&AzureDevopsRoleAssignmentResource{},
+	&AzureDevopsBuildFolderResource{},
 }
 
 type AzureDevopsResource interface {

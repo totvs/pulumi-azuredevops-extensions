@@ -45,6 +45,36 @@
         }
     },
     "resources": {
+        "azuredevops-extensions:index:BuildFolder": {
+            "properties": {
+                "projectId": {
+                    "type": "string",
+                    "description": "The project ID or project name.\n"
+                },
+                "path": {
+                    "type": "string",
+                    "description": "The path to be created.\n"
+                }
+            },
+            "required": [
+                "projectId",
+                "path"
+            ],
+            "inputProperties": {
+                "projectId": {
+                    "type": "string",
+                    "description": "The project ID or project name.\n"
+                },
+                "path": {
+                    "type": "string",
+                    "description": "The path to be created.\n"
+                }
+            },
+            "requiredInputs": [
+                "projectId",
+                "path"
+            ]
+        },
         "azuredevops-extensions:index:RoleAssignment": {
             "properties": {
                 "resourceId": {
