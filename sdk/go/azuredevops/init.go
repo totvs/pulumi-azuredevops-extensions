@@ -22,6 +22,8 @@ func (m *module) Construct(ctx *pulumi.Context, name, typ, urn string) (r pulumi
 	switch typ {
 	case "azuredevops-extensions:index:BuildFolder":
 		r = &BuildFolder{}
+	case "azuredevops-extensions:index:BuildFolderPermissions":
+		r = &BuildFolderPermissions{}
 	case "azuredevops-extensions:index:PipelineEnvironment":
 		r = &PipelineEnvironment{}
 	case "azuredevops-extensions:index:RoleAssignment":

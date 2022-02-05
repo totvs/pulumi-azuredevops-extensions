@@ -227,8 +227,7 @@ func (c *AzureDevopsBuildFolderResource) updateBuildFolder(
 
 	newPath := fmt.Sprintf(`{
 		"path": "%s"
-	}`, newBuildFolderId.Path)
-	newPath = strings.Replace(newPath, "/", "\\\\", -1)
+	}`, transformPath(newBuildFolderId.Path))
 
 	client := resty.New()
 	url := fmt.Sprintf(
@@ -301,4 +300,8 @@ func (c *AzureDevopsBuildFolderResource) removeBuildFolder(buildFolderId AzureDe
 	}
 
 	return err
+}
+
+func transformPath(path string) string {
+	return strings.Replace(path, "/", "\\\\", -1)
 }

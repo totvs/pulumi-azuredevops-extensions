@@ -6,6 +6,7 @@ import * as utilities from "./utilities";
 
 // Export members:
 export * from "./buildFolder";
+export * from "./buildFolderPermissions";
 export * from "./pipelineEnvironment";
 export * from "./provider";
 export * from "./roleAssignment";
@@ -24,6 +25,7 @@ export {
 
 // Import resources to register:
 import { BuildFolder } from "./buildFolder";
+import { BuildFolderPermissions } from "./buildFolderPermissions";
 import { PipelineEnvironment } from "./pipelineEnvironment";
 import { RoleAssignment } from "./roleAssignment";
 
@@ -33,6 +35,8 @@ const _module = {
         switch (type) {
             case "azuredevops-extensions:index:BuildFolder":
                 return new BuildFolder(name, <any>undefined, { urn })
+            case "azuredevops-extensions:index:BuildFolderPermissions":
+                return new BuildFolderPermissions(name, <any>undefined, { urn })
             case "azuredevops-extensions:index:PipelineEnvironment":
                 return new PipelineEnvironment(name, <any>undefined, { urn })
             case "azuredevops-extensions:index:RoleAssignment":

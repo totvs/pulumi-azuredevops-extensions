@@ -14,6 +14,7 @@ var AzureDevopsResources = []AzureDevopsResource{
 	&AzureDevopsEnvironmentResource{},
 	&AzureDevopsRoleAssignmentResource{},
 	&AzureDevopsBuildFolderResource{},
+	&AzureDevopsBuildFolderPermissionsResource{},
 }
 
 type AzureDevopsResource interface {

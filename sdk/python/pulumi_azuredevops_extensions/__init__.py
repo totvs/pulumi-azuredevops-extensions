@@ -7,6 +7,7 @@ import typing
 # Export this package's modules as members:
 from ._enums import *
 from .build_folder import *
+from .build_folder_permissions import *
 from .pipeline_environment import *
 from .provider import *
 from .role_assignment import *
@@ -28,6 +29,7 @@ _utilities.register(
   "fqn": "pulumi_azuredevops_extensions",
   "classes": {
    "azuredevops-extensions:index:BuildFolder": "BuildFolder",
+   "azuredevops-extensions:index:BuildFolderPermissions": "BuildFolderPermissions",
    "azuredevops-extensions:index:PipelineEnvironment": "PipelineEnvironment",
    "azuredevops-extensions:index:RoleAssignment": "RoleAssignment"
   }

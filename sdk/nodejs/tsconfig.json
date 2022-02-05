@@ -14,6 +14,7 @@
     },
     "files": [
         "buildFolder.ts",
+        "buildFolderPermissions.ts",
         "config/index.ts",
         "config/vars.ts",
         "index.ts",
