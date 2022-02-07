@@ -265,7 +265,7 @@ func (c *AzureDevopsBuildFolderPermissionsResource) createAccessControlEntriesRe
 
 func (c *AzureDevopsBuildFolderPermissionsResource) createBuildFolderPermissionsId(accessControlEntries AccessControlEntries) string {
 	return fmt.Sprintf(
-		"%s/%d/%d/%s",
+		"%s\\%d\\%d\\%s",
 		accessControlEntries.Token,
 		accessControlEntries.AccessControlEntries[0].Allow,
 		accessControlEntries.AccessControlEntries[0].Deny,

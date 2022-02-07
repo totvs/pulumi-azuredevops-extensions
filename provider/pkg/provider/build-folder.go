@@ -1,9 +1,7 @@
 package provider
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 
 	resty "github.com/go-resty/resty/v2"
@@ -259,12 +257,11 @@ func (c *AzureDevopsBuildFolderResource) updateBuildFolder(
 }
 
 func (c *AzureDevopsBuildFolderResource) createBuildFolderId(input AzureDevopsBuildFolderInputId) string {
-	data, err := json.Marshal(input)
-	if err != nil {
-		log.Fatal("error marshalling role assignment input: ", err)
-	}
-
-	return string(data)
+	return fmt.Sprintf(
+		"%s\\%s",
+		input.ProjectId,
+		input.Path,
+	)
 }
 
 func (c *AzureDevopsBuildFolderResource) removeBuildFolder(buildFolderId AzureDevopsBuildFolderInputId) error {

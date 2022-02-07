@@ -1,9 +1,7 @@
 package provider
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
 
 	resty "github.com/go-resty/resty/v2"
 	pbempty "github.com/golang/protobuf/ptypes/empty"
@@ -154,13 +152,13 @@ func (c *AzureDevopsRoleAssignmentResource) Create(req *pulumirpc.CreateRequest)
 }
 
 func (c *AzureDevopsRoleAssignmentResource) Delete(req *pulumirpc.DeleteRequest) (*pbempty.Empty, error) {
-	var input AzureDevopsRoleAssignmentId
-	err := json.Unmarshal([]byte(req.Id), &input)
+	inputs, err := plugin.UnmarshalProperties(req.GetProperties(), plugin.MarshalOptions{KeepUnknowns: true, SkipNulls: true})
 	if err != nil {
 		return nil, err
 	}
+	id := c.ToAzureDevopsRoleAssignmentsInputId(inputs["__inputs"].ObjectValue())
 
-	return &pbempty.Empty{}, c.removeRoleAssignment(input)
+	return &pbempty.Empty{}, c.removeRoleAssignment(id)
 }
 
 func (c *AzureDevopsRoleAssignmentResource) Check(req *pulumirpc.CheckRequest) (*pulumirpc.CheckResponse, error) {
@@ -272,12 +270,13 @@ func (c *AzureDevopsRoleAssignmentResource) setRoleAssignment(input AzureDevopsR
 }
 
 func (c *AzureDevopsRoleAssignmentResource) createRoleAssignmentId(input AzureDevopsRoleAssignmentId) string {
-	data, err := json.Marshal(input)
-	if err != nil {
-		log.Fatal("error marshalling role assignment input: ", err)
-	}
-
-	return string(data)
+	return fmt.Sprintf(
+		"%s\\%s\\%s\\%s",
+		input.IdentityId,
+		input.ResourceId,
+		input.UserId,
+		input.ScopeName.GetScopeId(),
+	)
 }
 
 func (c *AzureDevopsRoleAssignmentResource) removeRoleAssignment(roleAssignmentId AzureDevopsRoleAssignmentId) error {
@@ -331,4 +330,26 @@ func (c *AzureDevopsRoleAssignmentResource) getResourceSeparator(scope ScopeName
 	}
 
 	return ""
+}
+
+func (c *AzureDevopsRoleAssignmentResource) ToAzureDevopsRoleAssignmentsInputId(inputMap resource.PropertyMap) AzureDevopsRoleAssignmentId {
+	input := AzureDevopsRoleAssignmentId{}
+
+	if inputMap["resourceId"].HasValue() && inputMap["resourceId"].IsString() {
+		input.ResourceId = inputMap["resourceId"].StringValue()
+	}
+
+	if inputMap["identityId"].HasValue() && inputMap["identityId"].IsString() {
+		input.IdentityId = inputMap["identityId"].StringValue()
+	}
+
+	if inputMap["scopeName"].HasValue() && inputMap["scopeName"].IsString() {
+		input.ScopeName = ScopeNameInput(inputMap["scopeName"].StringValue())
+	}
+
+	if inputMap["userId"].HasValue() && inputMap["userId"].IsString() {
+		input.UserId = inputMap["userId"].StringValue()
+	}
+
+	return input
 }
