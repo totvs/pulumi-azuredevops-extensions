@@ -352,7 +352,8 @@ func (c *AzureDevopsBuildFolderPermissionsResource) getIdentityTypeByCode(identi
 }
 
 func (c *AzureDevopsBuildFolderPermissionsResource) getAzureDevopsPermissionsToken(projectId string, path string) string {
-	return fmt.Sprintf("%s%s", projectId, path)
+	pathNormalized := strings.Replace(path, "\\", "/", -1)
+	return fmt.Sprintf("%s%s", projectId, pathNormalized)
 }
 
 func (c *AzureDevopsBuildFolderPermissionsResource) getBuildPermissions(list resource.PropertyMap) AzureDevopsBuildPermissions {
