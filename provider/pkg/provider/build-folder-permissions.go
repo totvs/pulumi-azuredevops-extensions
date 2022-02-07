@@ -65,64 +65,50 @@ func (c *AzureDevopsBuildFolderPermissionsResource) Configure(config AzureDevops
 }
 
 func (c *AzureDevopsBuildFolderPermissionsResource) Diff(req *pulumirpc.DiffRequest) (*pulumirpc.DiffResponse, error) {
-	// olds, err := plugin.UnmarshalProperties(req.GetOlds(), plugin.MarshalOptions{KeepUnknowns: true, SkipNulls: false})
-	// if err != nil {
-	// 	return nil, err
-	// }
+	olds, err := plugin.UnmarshalProperties(req.GetOlds(), plugin.MarshalOptions{KeepUnknowns: true, SkipNulls: false})
+	if err != nil {
+		return nil, err
+	}
 
-	// news, err := plugin.UnmarshalProperties(req.GetNews(), plugin.MarshalOptions{KeepUnknowns: true, SkipNulls: false})
-	// if err != nil {
-	// 	return nil, err
-	// }
+	news, err := plugin.UnmarshalProperties(req.GetNews(), plugin.MarshalOptions{KeepUnknowns: true, SkipNulls: false})
+	if err != nil {
+		return nil, err
+	}
 
-	// diffsInput := olds["__inputs"].ObjectValue().Diff(news)
-	// if diffsInput == nil {
-	// 	return &pulumirpc.DiffResponse{
-	// 		Changes:             pulumirpc.DiffResponse_DIFF_NONE,
-	// 		DeleteBeforeReplace: false,
-	// 	}, nil
-	// }
+	diffsInput := olds["__inputs"].ObjectValue().Diff(news)
+	if diffsInput == nil {
+		return &pulumirpc.DiffResponse{
+			Changes:             pulumirpc.DiffResponse_DIFF_NONE,
+			DeleteBeforeReplace: false,
+		}, nil
+	}
 
-	// var diffs []string
-	// if diffsInput.Changed("path") {
-	// 	diffs = append(diffs, "path")
-	// }
+	var replaces []string
+	if diffsInput.Changed("path") {
+		replaces = append(replaces, "path")
+	}
+	if diffsInput.Changed("permissions") {
+		replaces = append(replaces, "permissions")
+	}
+	if diffsInput.Changed("principal") {
+		replaces = append(replaces, "principal")
+	}
+	if diffsInput.Changed("projectId") {
+		replaces = append(replaces, "projectId")
+	}
+	if diffsInput.Changed("replace") {
+		replaces = append(replaces, "replace")
+	}
 
-	// var replaces []string
-	// if diffsInput.Changed("projectId") {
-	// 	replaces = append(replaces, "projectId")
-	// }
-
-	// if len(replaces) > 0 {
-	// 	replaces = append(replaces, diffs...)
-	// 	diffs = nil
-	// }
-
-	// return &pulumirpc.DiffResponse{
-	// 	Changes:             pulumirpc.DiffResponse_DIFF_SOME,
-	// 	Replaces:            replaces,
-	// 	Diffs:               diffs,
-	// 	Stables:             []string{},
-	// 	DeleteBeforeReplace: true,
-	// }, nil
-
-	return nil, nil
+	return &pulumirpc.DiffResponse{
+		Changes:             pulumirpc.DiffResponse_DIFF_SOME,
+		Replaces:            replaces,
+		Stables:             []string{},
+		DeleteBeforeReplace: true,
+	}, nil
 }
 
 func (c *AzureDevopsBuildFolderPermissionsResource) Create(req *pulumirpc.CreateRequest) (*pulumirpc.CreateResponse, error) {
-	// fmt.Println("-------------------------------------------")
-	// fmt.Println(inputs)
-	// descriptor, _ := createDescriptor(inputs["principal"].StringValue())
-	// fmt.Println("descriptor:", descriptor)
-	// fmt.Println("path:", inputs["path"].StringValue())
-	// fmt.Println("projectId:", inputs["projectId"].StringValue())
-	// fmt.Println("token:", getAzureDevopsPermissionsToken(inputs["projectId"].StringValue(), inputs["path"].StringValue()))
-	// fmt.Println("security namespace id:", BUILD_SECURITY_NAMESPACE_ID)
-	// buildPermissions := getBuildPermissions(inputs["permissions"].ObjectValue())
-	// fmt.Println("allow:", buildPermissions.Allow)
-	// fmt.Println("deny:", buildPermissions.Deny)
-	// fmt.Println("-------------------------------------------")
-
 	inputs, err := plugin.UnmarshalProperties(req.GetProperties(), plugin.MarshalOptions{KeepUnknowns: true, SkipNulls: true})
 	if err != nil {
 		return nil, err
@@ -167,39 +153,7 @@ func (c *AzureDevopsBuildFolderPermissionsResource) Check(req *pulumirpc.CheckRe
 }
 
 func (c *AzureDevopsBuildFolderPermissionsResource) Update(req *pulumirpc.UpdateRequest) (*pulumirpc.UpdateResponse, error) {
-	return nil, nil
-
-	// inputOlds, err := plugin.UnmarshalProperties(req.GetOlds(), plugin.MarshalOptions{KeepUnknowns: true, SkipNulls: true})
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// inputNews, err := plugin.UnmarshalProperties(req.GetNews(), plugin.MarshalOptions{KeepUnknowns: true, SkipNulls: true})
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// inputOldsBuildFolderPermissions := c.ToAzureDevopsBuildFolderPermissionsInputId(inputOlds["__inputs"].ObjectValue())
-	// inputNewsBuildFolderPermissions := c.ToAzureDevopsBuildFolderPermissionsInputId(inputNews)
-	// _, err = c.updateBuildFolderPermissions(inputOldsBuildFolderPermissions, inputNewsBuildFolderPermissions)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// outputStore := resource.PropertyMap{}
-	// outputStore["__inputs"] = resource.NewObjectProperty(inputNews)
-
-	// outputProperties, err := plugin.MarshalProperties(
-	// 	outputStore,
-	// 	plugin.MarshalOptions{},
-	// )
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// return &pulumirpc.UpdateResponse{
-	// 	Properties: outputProperties,
-	// }, nil
+	return nil, fmt.Errorf("Update is not supported")
 }
 
 func (k *AzureDevopsBuildFolderPermissionsResource) Read(req *pulumirpc.ReadRequest) (*pulumirpc.ReadResponse, error) {
@@ -254,6 +208,11 @@ func (c *AzureDevopsBuildFolderPermissionsResource) createBuildFolderPermissions
 		return "", err
 	}
 
+	// TODO: implement aad user
+	if strings.HasPrefix(accessControlEntriesRequestBody.AccessControlEntries[0].Descriptor, "Microsoft.IdentityModel.Claims.ClaimsIdentity") {
+		return "", fmt.Errorf("aad user is not supported: %s", accessControlEntriesRequestBody.AccessControlEntries[0].Descriptor)
+	}
+
 	client := resty.New()
 	url := fmt.Sprintf("%s/_apis/AccessControlEntries/{securityNamespace}", *urlOrg)
 	resp, err := client.R().
@@ -302,54 +261,6 @@ func (c *AzureDevopsBuildFolderPermissionsResource) createAccessControlEntriesRe
 			},
 		},
 	}, nil
-}
-
-func (c *AzureDevopsBuildFolderPermissionsResource) updateBuildFolderPermissions(
-	oldBuildFolderPermissionsId AzureDevopsBuildFolderPermissionsInput,
-	newBuildFolderPermissionsId AzureDevopsBuildFolderPermissionsInput) (string, error) {
-
-	return "", nil
-
-	// urlOrg, err := c.config.getOrgServiceUrl()
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// pat, err := c.config.getPersonalAccessToken()
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// newPath := fmt.Sprintf(`{
-	// 	"path": "%s"
-	// }`, transformPath(newBuildFolderPermissionsId.Path))
-
-	// client := resty.New()
-	// url := fmt.Sprintf(
-	// 	"%s/_apis/build/folders?path=%s",
-	// 	*urlOrg,
-	// 	BUILD_SECURITY_NAMESPACE_ID)
-	// resp, err := client.R().
-	// 	SetBasicAuth("pat", *pat).
-	// 	SetQueryString("api-version=6.0-preview.2").
-	// 	SetHeader("Content-Type", "application/json").
-	// 	SetBody(newPath).
-	// 	Post(url)
-
-	// if err != nil || resp.StatusCode() != 200 {
-	// 	return nil, fmt.Errorf(
-	// 		"error creating build folder [%s, %s, %s, %s, %s]': %s",
-	// 		*urlOrg,
-	// 		BUILD_SECURITY_NAMESPACE_ID,
-	// 		oldBuildFolderPermissionsId.ProjectId,
-	// 		oldBuildFolderPermissionsId.Path,
-	// 		resp.Status(),
-	// 		err)
-	// }
-
-	// id := c.createBuildFolderPermissionsId(newBuildFolderPermissionsId)
-
-	// return &id, err
 }
 
 func (c *AzureDevopsBuildFolderPermissionsResource) createBuildFolderPermissionsId(accessControlEntries AccessControlEntries) string {
