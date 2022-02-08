@@ -34,6 +34,16 @@ type azuredevopsExtensionsProvider struct {
 	version string
 }
 
+type AzureDevopsError struct {
+	Id             string `json:"id"`
+	InnerException string `json:"innerException"`
+	Message        string `json:"message"`
+	TypeName       string `json:"typeName"`
+	TypeKey        string `json:"typeKey"`
+	ErrorCode      int    `json:"errorCode"`
+	EventId        int    `json:"eventId"`
+}
+
 func makeProvider(host *provider.HostClient, name, version string) (pulumirpc.ResourceProviderServer, error) {
 	// Return the new provider
 	return &azuredevopsExtensionsProvider{

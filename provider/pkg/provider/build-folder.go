@@ -195,13 +195,18 @@ func (c *AzureDevopsBuildFolderResource) createBuildFolder(buildFolderId AzureDe
 		Put(url)
 
 	if err != nil || resp.StatusCode() != 200 {
+		message := ""
+		azError, err := MarshalAzureDevopsError(resp.Body())
+		if err == nil {
+			message = azError.Message
+		}
 		return nil, fmt.Errorf(
 			"error creating build folder [%s, %s, %s, %s]': %s",
 			*urlOrg,
 			buildFolderId.ProjectId,
 			buildFolderId.Path,
 			resp.Status(),
-			err)
+			message)
 	}
 
 	id := c.createBuildFolderId(buildFolderId)
@@ -241,6 +246,11 @@ func (c *AzureDevopsBuildFolderResource) updateBuildFolder(
 		Post(url)
 
 	if err != nil || resp.StatusCode() != 200 {
+		message := ""
+		azError, err := MarshalAzureDevopsError(resp.Body())
+		if err == nil {
+			message = azError.Message
+		}
 		return nil, fmt.Errorf(
 			"error creating build folder [%s, %s, %s, %s, %s]': %s",
 			*urlOrg,
@@ -248,7 +258,7 @@ func (c *AzureDevopsBuildFolderResource) updateBuildFolder(
 			oldBuildFolderId.Path,
 			newBuildFolderId.Path,
 			resp.Status(),
-			err)
+			message)
 	}
 
 	id := c.createBuildFolderId(newBuildFolderId)
