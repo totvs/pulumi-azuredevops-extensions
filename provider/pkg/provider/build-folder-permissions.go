@@ -45,7 +45,8 @@ type AccessControlEntries struct {
 }
 
 const (
-	BUILD_SECURITY_NAMESPACE_ID = "33344d9c-fc72-4d6f-aba5-fa317101a7e9"
+	BUILD_SECURITY_NAMESPACE_ID       = "33344d9c-fc72-4d6f-aba5-fa317101a7e9"
+	MICROSOFT_TEAMFOUNDATION_IDENTITY = "Microsoft.TeamFoundation.Identity"
 )
 
 type AzureDevopsBuildFolderPermissionsInput struct {
@@ -114,8 +115,8 @@ func (c *AzureDevopsBuildFolderPermissionsResource) Create(req *pulumirpc.Create
 		return nil, err
 	}
 
-	inputsBuildFolderPermissions := c.ToAzureDevopsBuildFolderPermissionsInput(inputs)
-	buildFolderId, err := c.createBuildFolderPermissions(inputsBuildFolderPermissions)
+	buildFolderPermissionsInputs := c.ToAzureDevopsBuildFolderPermissionsInput(inputs)
+	buildFolderPermissions, err := c.createBuildFolderPermissions(buildFolderPermissionsInputs)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +133,7 @@ func (c *AzureDevopsBuildFolderPermissionsResource) Create(req *pulumirpc.Create
 	}
 
 	return &pulumirpc.CreateResponse{
-		Id:         buildFolderId,
+		Id:         buildFolderPermissions,
 		Properties: outputProperties,
 	}, nil
 }
@@ -208,9 +209,9 @@ func (c *AzureDevopsBuildFolderPermissionsResource) createBuildFolderPermissions
 		return "", err
 	}
 
-	// TODO: implement aad user
-	if strings.HasPrefix(accessControlEntriesRequestBody.AccessControlEntries[0].Descriptor, "Microsoft.IdentityModel.Claims.ClaimsIdentity") {
-		return "", fmt.Errorf("aad user is not supported: %s", accessControlEntriesRequestBody.AccessControlEntries[0].Descriptor)
+	// TODO: implement aad user and others...
+	if !strings.HasPrefix(accessControlEntriesRequestBody.AccessControlEntries[0].Descriptor, "Microsoft.TeamFoundation.Identity") {
+		return "", fmt.Errorf("access control not supported: %s", accessControlEntriesRequestBody.AccessControlEntries[0].Descriptor)
 	}
 
 	client := resty.New()
@@ -237,6 +238,10 @@ func (c *AzureDevopsBuildFolderPermissionsResource) createBuildFolderPermissions
 }
 
 func (c *AzureDevopsBuildFolderPermissionsResource) createAccessControlEntriesRequestBody(principal string, projectId string, path string, list resource.PropertyMap, replace bool) (AccessControlEntries, error) {
+	if !strings.HasPrefix(principal, "vssgp.") {
+		return AccessControlEntries{}, fmt.Errorf("principal not supported: %s", principal)
+	}
+
 	descriptor, err := c.createDescriptor(principal)
 	if err != nil {
 		return AccessControlEntries{}, err
@@ -327,28 +332,14 @@ func (c *AzureDevopsBuildFolderPermissionsResource) createDescriptor(principal s
 
 	decoded, err := base64.StdEncoding.DecodeString(tokens[1])
 	if err != nil {
-		return "", err
+		decoded, err = base64.StdEncoding.DecodeString(tokens[1] + "=")
+		if err != nil {
+			return "", fmt.Errorf("invalid principal format: %s (%s)", principal, err)
+		}
 	}
-
-	identityType, err := c.getIdentityTypeByCode(tokens[0])
-	if err != nil {
-		return "", err
-	}
-
-	descriptor := fmt.Sprintf("%s;%s", identityType, string(decoded))
+	descriptor := fmt.Sprintf("%s;%s", MICROSOFT_TEAMFOUNDATION_IDENTITY, string(decoded))
 
 	return descriptor, nil
-}
-
-func (c *AzureDevopsBuildFolderPermissionsResource) getIdentityTypeByCode(identityTypeCode string) (string, error) {
-	switch identityTypeCode {
-	case "vssgp":
-		return "Microsoft.TeamFoundation.Identity", nil
-	case "aad":
-		return "Microsoft.IdentityModel.Claims.ClaimsIdentity", nil
-	}
-
-	return "", fmt.Errorf("unknown identity type code: %s", identityTypeCode)
 }
 
 func (c *AzureDevopsBuildFolderPermissionsResource) getAzureDevopsPermissionsToken(projectId string, path string) string {
