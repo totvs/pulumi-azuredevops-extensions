@@ -183,12 +183,13 @@ func (c *AzureDevopsBuildFolderResource) createBuildFolder(buildFolderId AzureDe
 
 	client := resty.New()
 	url := fmt.Sprintf(
-		"%s/%s/_apis/build/folders?path=%s",
+		"%s/{projectId}/_apis/build/folders",
 		*urlOrg,
-		buildFolderId.ProjectId,
-		buildFolderId.Path)
+	)
 	resp, err := client.R().
 		SetBasicAuth("pat", *pat).
+		SetPathParam("projectId", buildFolderId.ProjectId).
+		SetQueryParam("path", buildFolderId.Path).
 		SetQueryString("api-version=6.0-preview.2").
 		SetHeader("Content-Type", "application/json").
 		SetBody("{}").
@@ -234,13 +235,14 @@ func (c *AzureDevopsBuildFolderResource) updateBuildFolder(
 
 	client := resty.New()
 	url := fmt.Sprintf(
-		"%s/%s/_apis/build/folders?path=%s",
+		"%s/{projectId}/_apis/build/folders",
 		*urlOrg,
-		oldBuildFolderId.ProjectId,
-		oldBuildFolderId.Path)
+	)
 	resp, err := client.R().
 		SetBasicAuth("pat", *pat).
 		SetQueryString("api-version=6.0-preview.2").
+		SetPathParam("projectId", oldBuildFolderId.ProjectId).
+		SetQueryParam("path", oldBuildFolderId.Path).
 		SetHeader("Content-Type", "application/json").
 		SetBody(newPath).
 		Post(url)
@@ -287,12 +289,13 @@ func (c *AzureDevopsBuildFolderResource) removeBuildFolder(buildFolderId AzureDe
 
 	client := resty.New()
 	url := fmt.Sprintf(
-		"%s/%s/_apis/build/folders?path=%s",
+		"%s/{projectId}/_apis/build/folders",
 		*urlOrg,
-		buildFolderId.ProjectId,
-		buildFolderId.Path)
+	)
 	resp, err := client.R().
 		SetBasicAuth("pat", *pat).
+		SetPathParam("projectId", buildFolderId.ProjectId).
+		SetQueryParam("path", buildFolderId.Path).
 		SetQueryString("api-version=6.0-preview.2").
 		Delete(url)
 

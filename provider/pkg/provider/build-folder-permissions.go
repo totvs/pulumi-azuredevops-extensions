@@ -224,6 +224,11 @@ func (c *AzureDevopsBuildFolderPermissionsResource) createBuildFolderPermissions
 		Post(url)
 
 	if err != nil || resp.StatusCode() != 200 {
+		message := ""
+		azError, err := MarshalAzureDevopsError(resp.Body())
+		if err == nil {
+			message = azError.Message
+		}
 		return "", fmt.Errorf(
 			"error creating build folder permission [%s, %s, %s, %s, %s]': %s",
 			*urlOrg,
@@ -231,7 +236,7 @@ func (c *AzureDevopsBuildFolderPermissionsResource) createBuildFolderPermissions
 			buildFolderPermissionInput.ProjectId,
 			buildFolderPermissionInput.Path,
 			resp.Status(),
-			err)
+			message)
 	}
 
 	return c.createBuildFolderPermissionsId(accessControlEntriesRequestBody), err
@@ -310,6 +315,11 @@ func (c *AzureDevopsBuildFolderPermissionsResource) removeBuildFolderPermissions
 		Delete(fmt.Sprintf("%s/_apis/AccessControlEntries/{securityNamespace}", *urlOrg))
 
 	if err != nil || resp.StatusCode() != 200 {
+		message := ""
+		azError, err := MarshalAzureDevopsError(resp.Body())
+		if err == nil {
+			message = azError.Message
+		}
 		return fmt.Errorf(
 			"error deleting build folder permission [%s, %s, %s, %s, %s]': %s",
 			*urlOrg,
@@ -317,7 +327,7 @@ func (c *AzureDevopsBuildFolderPermissionsResource) removeBuildFolderPermissions
 			buildFolderPermissionInput.ProjectId,
 			buildFolderPermissionInput.Path,
 			resp.Status(),
-			err)
+			message)
 
 	}
 
