@@ -31,6 +31,7 @@ import (
 type azuredevopsExtensionsProvider struct {
 	host    *provider.HostClient
 	name    string
+	schema  string
 	version string
 }
 
@@ -44,11 +45,12 @@ type AzureDevopsError struct {
 	EventId        int    `json:"eventId"`
 }
 
-func makeProvider(host *provider.HostClient, name, version string) (pulumirpc.ResourceProviderServer, error) {
+func makeProvider(host *provider.HostClient, name, schema, version string) (pulumirpc.ResourceProviderServer, error) {
 	// Return the new provider
 	return &azuredevopsExtensionsProvider{
 		host:    host,
 		name:    name,
+		schema:  schema,
 		version: version,
 	}, nil
 }
@@ -90,7 +92,8 @@ func (k *azuredevopsExtensionsProvider) Configure(_ context.Context, req *pulumi
 
 // Invoke dynamically executes a built-in function in the provider.
 func (k *azuredevopsExtensionsProvider) Invoke(_ context.Context, req *pulumirpc.InvokeRequest) (*pulumirpc.InvokeResponse, error) {
-	return nil, nil
+	tok := req.GetTok()
+	return nil, fmt.Errorf("invoke not supported '%s'", tok)
 }
 
 // StreamInvoke dynamically executes a built-in function in the provider. The result is streamed
@@ -157,7 +160,9 @@ func (k *azuredevopsExtensionsProvider) GetPluginInfo(context.Context, *pbempty.
 
 // GetSchema returns the JSON-serialized schema for the provider.
 func (k *azuredevopsExtensionsProvider) GetSchema(_ context.Context, req *pulumirpc.GetSchemaRequest) (*pulumirpc.GetSchemaResponse, error) {
-	return &pulumirpc.GetSchemaResponse{}, nil
+	return &pulumirpc.GetSchemaResponse{
+		Schema: k.schema,
+	}, nil
 }
 
 // Cancel signals the provider to gracefully shut down and abort any ongoing resource operations.

@@ -9,8 +9,6 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/common/resource"
 	"github.com/pulumi/pulumi/sdk/v3/go/common/resource/plugin"
 	pulumirpc "github.com/pulumi/pulumi/sdk/v3/proto/go"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type AzureDevopsBuildFolderResource struct {
@@ -152,11 +150,42 @@ func (c *AzureDevopsBuildFolderResource) Update(req *pulumirpc.UpdateRequest) (*
 	}, nil
 }
 
-func (k *AzureDevopsBuildFolderResource) Read(req *pulumirpc.ReadRequest) (*pulumirpc.ReadResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "read is not yet implemented for "+k.Name())
+func (c *AzureDevopsBuildFolderResource) Read(req *pulumirpc.ReadRequest) (*pulumirpc.ReadResponse, error) {
+	id := req.GetId()
+	tokens := strings.Split(id, "\\")
+
+	inputStore := resource.PropertyMap{}
+	inputStore["projectId"] = resource.NewStringProperty(tokens[0])
+	inputStore["path"] = resource.NewStringProperty(tokens[1])
+
+	inputProperties, err := plugin.MarshalProperties(
+		inputStore,
+		plugin.MarshalOptions{},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	outputStore := resource.PropertyMap{}
+	outputStore["__inputs"] = resource.NewObjectProperty(inputStore)
+
+	outputProperties, err := plugin.MarshalProperties(
+		outputStore,
+		plugin.MarshalOptions{},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pulumirpc.ReadResponse{
+		Id:         req.GetId(),
+		Inputs:     inputProperties,
+		Properties: outputProperties,
+	}, nil
 }
 
 func (r *AzureDevopsBuildFolderResource) ToAzureDevopsBuildFolderInputId(inputMap resource.PropertyMap) AzureDevopsBuildFolderInputId {
+
 	input := AzureDevopsBuildFolderInputId{}
 
 	if inputMap["projectId"].HasValue() && inputMap["projectId"].IsString() {
