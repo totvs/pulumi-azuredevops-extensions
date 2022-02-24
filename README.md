@@ -43,7 +43,6 @@ pulumi plugin install resource azuredevops-extensions 0.0.2 -f pulumi-resource-a
 ## Build pipeline folder import
 To import build pipeline folder, use the following format ```<azuredevops-project-id>\/<folder-name>```. Example:
 
-
 ```sh
 pulumi import 'azuredevops-extensions:index:BuildFolder' 'totvsapps-dev-folder' '5687c295-d324-41c7-a430-5a50f190a0c1\/totvsapps-dev'
 ```
