@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goversion: [1.16.x]
+        goversion: [1.17.x]
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
@@ -61,7 +61,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        goversion: [1.16.x]
+        goversion: [1.17.x]
         dotnetversion: [ 3.1.301 ]
         nodeversion: [ 14.x ]
         pythonversion: [ 3.7 ]
@@ -120,7 +120,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goversion: [1.16.x]
+        goversion: [1.17.x]
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
