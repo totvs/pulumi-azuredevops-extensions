@@ -340,11 +340,15 @@ func (c *AzureDevopsBuildFolderPermissionsResource) createDescriptor(principal s
 		return "", fmt.Errorf("invalid principal format: %s", principal)
 	}
 
+	// This is a hack, but it works for now.
 	decoded, err := base64.StdEncoding.DecodeString(tokens[1])
 	if err != nil {
 		decoded, err = base64.StdEncoding.DecodeString(tokens[1] + "=")
 		if err != nil {
-			return "", fmt.Errorf("invalid principal format: %s (%s)", principal, err)
+			decoded, err = base64.StdEncoding.DecodeString(tokens[1] + "==")
+			if err != nil {
+				return "", fmt.Errorf("invalid principal format: %s (%s)", principal, err)
+			}
 		}
 	}
 	descriptor := fmt.Sprintf("%s;%s", MICROSOFT_TEAMFOUNDATION_IDENTITY, string(decoded))
